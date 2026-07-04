@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>名店ものがたり — 放置経営シム</title>
+<style>
+:root{
+  --bg:#f7f6f3; --card:#ffffff; --ink:#1a1a1a; --sub:#8a8a86;
+  --line:#e9e7e2; --accent:#d95d39; --accent2:#2f6f5e; --gold:#c9a227;
+  --r:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:#e9e7e2; color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  display:flex;justify-content:center;
+}
+#app{
+  width:100%;max-width:430px;height:100dvh;background:var(--bg);
+  display:flex;flex-direction:column;position:relative;overflow:hidden;
+  box-shadow:0 0 40px rgba(0,0,0,.08);
+}
+/* ---------- top bar ---------- */
+#top{
+  padding:12px 16px 8px;background:var(--card);border-bottom:1px solid var(--line);
+  flex-shrink:0;
+}
+#top .row1{display:flex;justify-content:space-between;align-items:baseline}
+#storeName{font-size:15px;font-weight:700;letter-spacing:.02em;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#clock{font-size:11px;color:var(--sub);font-variant-numeric:tabular-nums}
+#top .row2{display:flex;gap:14px;margin-top:6px;align-items:center}
+.stat{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat small{font-size:10px;color:var(--sub);font-weight:500;margin-right:2px}
+#money{color:var(--accent)}
+#rep{color:var(--accent2)}
+#noren{color:var(--gold)}
+#stageBadge{
+  margin-left:auto;font-size:10px;padding:3px 8px;border-radius:20px;
+  background:var(--ink);color:#fff;font-weight:600;
+}
+#seasonBar{
+  font-size:11px;padding:5px 16px;color:var(--sub);background:var(--card);
+  border-bottom:1px solid var(--line);display:flex;justify-content:space-between;flex-shrink:0;
+}
+#eventFlash{color:var(--accent);font-weight:700}
+/* ---------- main scroll area ---------- */
+#main{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:8px}
+.page{display:none;padding:14px 14px 20px}
+.page.on{display:block}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px;margin-bottom:12px;
+}
+.card h3{font-size:12px;color:var(--sub);font-weight:600;letter-spacing:.06em;margin-bottom:10px}
+/* store view */
+#storeVis{min-height:120px}
+#seatRow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 10px}
+.seat{
+  width:44px;height:44px;border-radius:12px;border:1.5px dashed var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  background:#fbfaf8;transition:all .25s;
+}
+.seat.full{border-style:solid;border-color:#d9d4cb;background:#fff8ef;animation:pop .3s}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+#queueLine{font-size:12px;color:var(--sub);min-height:18px}
+#queueLine b{color:var(--ink)}
+/* log */
+#log{list-style:none;font-size:12px;line-height:1.9;color:#555}
+#log li{border-bottom:1px dashed var(--line);padding:2px 0}
+#log li.good{color:var(--accent2);font-weight:600}
+#log li.big{color:var(--accent);font-weight:700}
+/* buttons */
+.btn{
+  display:block;width:100%;padding:12px;border:none;border-radius:12px;
+  background:var(--ink);color:#fff;font-size:14px;font-weight:700;
+  font-family:inherit;cursor:pointer;transition:transform .1s,opacity .2s;
+  position:relative;overflow:hidden;
+}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.acc{background:var(--accent)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn.small{padding:8px 12px;font-size:12px;width:auto;display:inline-block}
+.btn .cd{
+  position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.25);
+  width:0%;pointer-events:none;
+}
+.mktGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mktGrid .btn{padding:11px 8px;font-size:13px}
+.mktGrid .btn small{display:block;font-size:10px;font-weight:500;opacity:.75;margin-top:2px}
+.lockNote{font-size:11px;color:var(--sub);text-align:center;margin-top:8px}
+/* list rows */
+.rowItem{
+  display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);
+}
+.rowItem:last-child{border-bottom:none}
+.rowItem .ic{font-size:24px;width:34px;text-align:center;flex-shrink:0}
+.rowItem .bd{flex:1;min-width:0}
+.rowItem .bd .nm{font-size:13px;font-weight:700}
+.rowItem .bd .ds{font-size:11px;color:var(--sub);margin-top:1px}
+.rowItem .ac{flex-shrink:0}
+.tag{
+  display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;
+  background:#f0eee9;color:#6b6b66;font-weight:600;margin-left:4px;
+}
+.tag.on{background:var(--accent);color:#fff}
+.tag.sig{background:var(--gold);color:#fff}
+/* bottom nav */
+#nav{
+  display:flex;background:var(--card);border-top:1px solid var(--line);flex-shrink:0;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#nav button{
+  flex:1;padding:9px 0 7px;border:none;background:none;font-family:inherit;cursor:pointer;
+  font-size:10px;color:var(--sub);font-weight:600;
+}
+#nav button .i{display:block;font-size:19px;margin-bottom:2px;filter:grayscale(1);opacity:.55;transition:all .15s}
+#nav button.on{color:var(--ink)}
+#nav button.on .i{filter:none;opacity:1}
+#nav button .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:3px;vertical-align:middle;opacity:0}
+#nav button.alert .dot{opacity:1}
+/* modal */
+#modalWrap{
+  position:absolute;inset:0;background:rgba(20,18,15,.55);display:none;
+  align-items:flex-end;justify-content:center;z-index:50;backdrop-filter:blur(2px);
+}
+#modalWrap.on{display:flex}
+#modal{
+  background:var(--card);width:100%;max-height:82%;overflow-y:auto;
+  border-radius:22px 22px 0 0;padding:22px 18px 30px;animation:up .28s ease-out;
+}
+@keyframes up{from{transform:translateY(40%)}to{transform:translateY(0)}}
+#modal h2{font-size:17px;margin-bottom:12px}
+/* envelope (開封) */
+#envelope{
+  text-align:center;padding:30px 10px;cursor:pointer;
+}
+#envelope .env{font-size:64px;display:block;animation:sway 1.2s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+#envelope p{font-size:13px;color:var(--sub);margin-top:12px}
+.reveal{text-align:center;padding:6px 0 2px}
+.reveal .amt{font-size:34px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.reveal .sub{font-size:12px;color:var(--sub);margin:4px 0 10px}
+.resultLine{
+  font-size:13px;padding:9px 12px;border-radius:10px;background:#f6f4f0;
+  margin-bottom:6px;text-align:left;
+}
+.resultLine.hit{background:#fdf0e9;color:var(--accent);font-weight:700}
+.resultLine.miss{color:var(--sub)}
+/* toast */
+#toast{
+  position:absolute;top:70px;left:50%;transform:translateX(-50%) translateY(-8px);
+  background:var(--ink);color:#fff;font-size:12px;font-weight:600;
+  padding:9px 16px;border-radius:24px;opacity:0;pointer-events:none;
+  transition:all .3s;z-index:60;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis;
+}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.buzz{background:var(--accent)}
+/* misc */
+.bigNum{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.hr{border:none;border-top:1px solid var(--line);margin:12px 0}
+.center{text-align:center}
+.starTxt{color:var(--gold);letter-spacing:1px}
+input.nameEdit{
+  font:inherit;font-size:15px;font-weight:700;border:none;border-bottom:1.5px solid var(--line);
+  background:none;width:100%;padding:4px 0;outline:none;
+}
+.progressBar{height:6px;background:#efede8;border-radius:3px;overflow:hidden;margin-top:6px}
+.progressBar>div{height:100%;background:var(--accent2);border-radius:3px;transition:width .4s}
+/* town scene */
+#townCard{padding:0;overflow:hidden}
+#town{width:100%;height:210px;display:block;touch-action:none;cursor:grab}
+#town.dragging{cursor:grabbing}
+#bustle{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--sub);padding:7px 12px;border-top:1px solid var(--line);flex-wrap:wrap;gap:2px 10px}
+#bustle b{color:var(--ink)}
+#bustle .lv{font-weight:800;color:var(--accent)}
+.panHint{font-size:10px;color:var(--sub);text-align:center;padding:0 0 6px;background:var(--card)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <div class="row1"><span id="storeName">ぼくの屋台</span><span id="clock">1日目 朝</span></div>
+    <div class="row2">
+      <span class="stat" id="money"><small>所持金</small>¥500</span>
+      <span class="stat" id="rep"><small>評判</small>0</span>
+      <span class="stat" id="noren" style="display:none"><small>のれん</small>0</span>
+      <span id="stageBadge">第1段階</span>
+    </div>
+  </div>
+  <div id="seasonBar"><span id="seasonTxt">🌸 春</span><span id="eventFlash"></span></div>
+
+  <div id="main">
+    <!-- ===== 店 ===== -->
+    <div class="page on" id="pg-store">
+      <div class="card" id="townCard">
+        <canvas id="town"></canvas>
+        <div class="panHint">← 左右にドラッグして町を見渡せる →</div>
+        <div id="bustle"></div>
+      </div>
+      <div class="card" id="storeVis">
+        <h3 id="visTitle">店内のようす</h3>
+        <div id="seatRow"></div>
+        <div id="queueLine"></div>
+        <div class="progressBar" id="stageProgWrap"><div id="stageProg" style="width:0%"></div></div>
+        <div class="lockNote" id="stageHint"></div>
+      </div>
+      <div class="card">
+        <h3>仕込み（集客の手）</h3>
+        <div class="mktGrid" id="mktBtns"></div>
+        <div class="lockNote" id="mktNote"></div>
+      </div>
+      <div class="card">
+        <h3>できごと</h3>
+        <ul id="log"></ul>
+      </div>
+    </div>
+
+    <!-- ===== メニュー ===== -->
+    <div class="page" id="pg-menu">
+      <div class="card">
+        <h3 id="menuTreeTitle">メニュー開発</h3>
+        <div id="menuList"></div>
+      </div>
+      <div class="card">
+        <h3>所持レシピ（他ジャンル）</h3>
+        <div id="ownedOther"><span class="lockNote">まだない</span></div>
+      </div>
+    </div>
+
+    <!-- ===== 内装 ===== -->
+    <div class="page" id="pg-interior">
+      <div class="card">
+        <h3>内装（客層を決めるスイッチ）</h3>
+        <div id="interiorList"></div>
+      </div>
+      <div class="card">
+        <h3>設備</h3>
+        <div id="facilityList"></div>
+      </div>
+    </div>
+
+    <!-- ===== スタッフ ===== -->
+    <div class="page" id="pg-staff">
+      <div class="card">
+        <h3>スタッフ <span class="tag" id="wageTag"></span></h3>
+        <div id="staffList"><span class="lockNote">まだ誰もいない。ひとり店主がんばれ！</span></div>
+        <hr class="hr">
+        <button class="btn" id="recruitBtn">面接をひらく（¥300）</button>
+        <div class="lockNote">応募者はランダム。当たり店員を引けるか？</div>
+      </div>
+    </div>
+
+    <!-- ===== その他 ===== -->
+    <div class="page" id="pg-etc">
+      <div class="card">
+        <h3>店の情報</h3>
+        <input class="nameEdit" id="nameEdit" maxlength="14">
+        <div style="font-size:12px;color:var(--sub);margin-top:10px" id="storeStats"></div>
+        <hr class="hr">
+        <button class="btn ghost" id="cardBtn">店カードを見る・シェア</button>
+      </div>
+      <div class="card">
+        <h3>常連さん</h3>
+        <div id="regularList"></div>
+      </div>
+      <div class="card">
+        <h3>称号・実績</h3>
+        <div id="achList"></div>
+      </div>
+      <div class="card" id="prestigeCard" style="display:none">
+        <h3>のれん分け</h3>
+        <p style="font-size:12px;line-height:1.7;color:#555">育てた店を弟子に譲り、新天地でゼロから。<br>永久ボーナス：のれん1つにつき <b>集客・売上 +10%</b></p>
+        <hr class="hr">
+        <button class="btn acc" id="prestigeBtn">のれん分けする</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="nav">
+    <button data-pg="store" class="on"><span class="i">🏮</span>店<span class="dot"></span></button>
+    <button data-pg="menu"><span class="i">🍳</span>メニュー<span class="dot"></span></button>
+    <button data-pg="interior"><span class="i">🪑</span>内装<span class="dot"></span></button>
+    <button data-pg="staff"><span class="i">👥</span>スタッフ<span class="dot"></span></button>
+    <button data-pg="etc"><span class="i">📖</span>その他<span class="dot"></span></button>
+  </div>
+
+  <div id="modalWrap"><div id="modal"></div></div>
+  <div id="toast"></div>
+</div>
+<script>
+"use strict";
+// ================================================================
+// 名店ものがたり — restaurant-sim-gdd.md full prototype
+// ================================================================
+// ---------------- DATA ----------------
+const SEGS = {
+  salaryman:{n:"サラリーマン",e:"👔",mult:1.3,reg:0.10,wom:1.0,tw:{a:0.4,l:1.6,e:0.9,n:1.2}},
+  student:  {n:"大学生",    e:"🎓",mult:0.7,reg:0.12,wom:2.2,tw:{a:0.3,l:1.2,e:1.4,n:1.1}},
+  family:   {n:"家族連れ",  e:"👨‍👩‍👧",mult:1.6,reg:0.18,wom:1.0,tw:{a:0.5,l:1.3,e:1.5,n:0.3}},
+  couple:   {n:"カップル",  e:"💑",mult:1.4,reg:0.10,wom:1.3,tw:{a:0.2,l:0.6,e:1.5,n:1.5}},
+  tourist:  {n:"観光客",    e:"🧳",mult:1.8,reg:0.01,wom:1.4,tw:{a:0.8,l:1.3,e:1.0,n:0.6}},
+  elder:    {n:"近所の常連",e:"👴",mult:0.9,reg:0.30,wom:0.6,tw:{a:1.6,l:1.0,e:0.8,n:0.3}},
+  influ:    {n:"インフルエンサー",e:"📸",mult:1.5,reg:0.05,wom:6.0,tw:{a:0.5,l:1.0,e:1.2,n:1.0}},
+};
+const INTERIORS = [
+ {id:"yatai", n:"屋台・縁日風", e:"🏮",cost:0,     tier:1,cui:"taishu", ds:"原点。安くて回転重視",       af:{student:1.3,elder:1.2,salaryman:1.0,family:0.8,couple:0.5,tourist:1.1}},
+ {id:"taishu",n:"大衆・下町",   e:"🍜",cost:1800,  tier:1,cui:"taishu", ds:"薄利多売、回転重視",         af:{salaryman:1.4,elder:1.4,student:1.2,couple:0.5,family:0.9}},
+ {id:"yofu",  n:"洋風",        e:"🍽️",cost:3000,  tier:2,cui:"italian",ds:"汎用的でバランス型",         af:{salaryman:1.1,family:1.1,couple:1.1,student:1.0}},
+ {id:"wafu",  n:"和風",        e:"🎍",cost:3800,  tier:2,cui:"wa",     ds:"落ち着き。年配・家族に強い",  af:{elder:1.6,family:1.4,tourist:1.3,student:0.6,couple:0.9}},
+ {id:"cafe",  n:"カフェ・喫茶店",e:"☕",cost:5000, tier:2,cui:"cafe",   ds:"まったり長居、単価中",       af:{couple:1.3,student:1.3,family:1.0,salaryman:0.8,influ:1.3}},
+ {id:"italian",n:"イタリアン", e:"🍕",cost:7500,  tier:3,cui:"italian",ds:"カップル・若者向け",         af:{couple:1.6,student:1.2,family:1.1,elder:0.6}},
+ {id:"showa", n:"昭和レトロ",  e:"📺",cost:10000, tier:3,cui:"cafe",   ds:"ノスタルジー＋映えの両取り",  af:{elder:1.4,influ:1.6,student:1.2,tourist:1.2}},
+ {id:"diner", n:"アメリカンダイナー",e:"🍔",cost:14000,tier:3,cui:"diner",ds:"家族・若者向け、ポップ",   af:{family:1.5,student:1.4,couple:1.1,elder:0.5}},
+ {id:"asian", n:"アジアン・エスニック",e:"🌴",cost:19000,tier:4,cui:"ethnic",ds:"個性派、SNS映え",      af:{influ:1.8,couple:1.3,student:1.2,tourist:1.4,elder:0.4}},
+ {id:"neon",  n:"ネオン・バー／居酒屋",e:"🍸",cost:26000,tier:4,cui:"bar",ds:"夜に強い",               af:{salaryman:1.6,couple:1.4,student:1.1,family:0.3,elder:0.4}},
+ {id:"modern",n:"モダン・スタイリッシュ",e:"🖤",cost:40000,tier:5,cui:"luxury",ds:"都会派、単価高め",   af:{couple:1.5,salaryman:1.3,influ:1.5,tourist:1.3,elder:0.4,student:0.6}},
+ {id:"gouka", n:"豪華・高級路線",e:"👑",cost:70000,tier:6,cui:"luxury",ds:"高単価。接待・記念日需要",   af:{salaryman:1.8,couple:1.6,tourist:1.6,family:1.0,student:0.2,elder:0.5}},
+];
+// menu item: [id,name,emoji,cat,price,cost,unlock,favSeg]  cat: main/side/dess/drink
+const TREES = {
+ taishu:[
+  ["onigiri","おにぎりセット","🍙","main",250,80,0,"elder"],
+  ["gyudon","デカ盛り牛丼","🍚","main",480,180,400,"student"],
+  ["kushi","串カツ盛り","🍢","side",350,120,600,"salaryman"],
+  ["oden","おでん","🍲","side",300,90,800,"elder"],
+  ["ramune","ラムネ","🥤","drink",150,30,300,"student"],
+  ["dango_t","みたらし団子","🍡","dess",200,60,500,"family"],
+ ],
+ wa:[
+  ["sushi","にぎり寿司","🍣","main",900,350,2000,"tourist"],
+  ["tempura","天ぷら定食","🍤","main",750,280,1500,"elder"],
+  ["soba","ざる蕎麦","🍜","side",450,140,900,"salaryman"],
+  ["matcha","抹茶","🍵","drink",300,60,700,"elder"],
+  ["dango","三色団子","🍡","dess",250,70,600,"family"],
+  ["kaiseki","ミニ会席","🎌","main",1600,650,6000,"tourist"],
+ ],
+ italian:[
+  ["pasta","生パスタ","🍝","main",850,300,1800,"couple"],
+  ["pizza","窯焼きピザ","🍕","main",950,320,2400,"student"],
+  ["salad","カプレーゼ","🥗","side",500,160,1000,"couple"],
+  ["wine","グラスワイン","🍷","drink",450,90,1200,"couple"],
+  ["gelato","ジェラート","🍨","dess",380,100,900,"family"],
+  ["course","記念日コース","💐","main",2200,900,8000,"couple"],
+ ],
+ cafe:[
+  ["pancake","ふわとろパンケーキ","🥞","main",780,240,1600,"influ"],
+  ["sando","たまごサンド","🥪","main",520,160,900,"student"],
+  ["coffee","自家焙煎コーヒー","☕","drink",400,70,800,"salaryman"],
+  ["parfait","季節のパフェ","🍓","dess",680,220,1400,"influ"],
+  ["scone","スコーン","🧁","side",320,90,600,"elder"],
+  ["cream_soda","クリームソーダ","🍹","drink",450,110,1000,"student"],
+ ],
+ bar:[
+  ["yakitori","炭火焼き鳥","🍗","main",650,220,1500,"salaryman"],
+  ["sashimi","刺身盛り","🐟","main",880,340,2200,"salaryman"],
+  ["karaage","唐揚げ","🍖","side",480,150,900,"student"],
+  ["beer","生ビール","🍺","drink",500,90,1000,"salaryman"],
+  ["highball","ハイボール","🥃","drink",420,70,800,"couple"],
+  ["cocktail","自家製カクテル","🍸","drink",650,130,1800,"couple"],
+ ],
+ diner:[
+  ["burger","チーズバーガー","🍔","main",780,260,1700,"student"],
+  ["steak","ステーキプレート","🥩","main",1300,500,3500,"family"],
+  ["fries","山盛りポテト","🍟","side",380,90,700,"student"],
+  ["shake","厚めシェイク","🥤","drink",480,110,1000,"family"],
+  ["pie","アップルパイ","🥧","dess",420,130,900,"family"],
+  ["pancake_d","スフレパンケーキ","🥞","dess",550,170,1300,"influ"],
+ ],
+ ethnic:[
+  ["gapao","ガパオライス","🍛","main",820,270,1800,"influ"],
+  ["pho","フォー","🍜","main",750,240,1500,"couple"],
+  ["satay","サテ串","🍢","side",450,140,900,"student"],
+  ["chai","スパイスチャイ","🫖","drink",420,80,900,"influ"],
+  ["mango","マンゴープリン","🥭","dess",480,140,1100,"couple"],
+  ["curry_e","薬膳カレー","🍛","main",900,300,2400,"tourist"],
+ ],
+ luxury:[
+  ["omakase","おまかせプレート","✨","main",2000,750,7000,"salaryman"],
+  ["truffle","トリュフリゾット","🍄","main",2400,950,9000,"couple"],
+  ["foie","前菜三種","🥂","side",1200,450,4000,"tourist"],
+  ["champ","シャンパン","🍾","drink",1500,350,5000,"couple"],
+  ["gateau","特製ガトー","🍰","dess",900,280,3000,"family"],
+  ["tokujo","特上コース","👑","main",3800,1500,15000,"salaryman"],
+ ],
+};
+const ITEM = {}; for(const t in TREES) TREES[t].forEach(a=>ITEM[a[0]]={id:a[0],n:a[1],e:a[2],cat:a[3],price:a[4],cost:a[5],unlock:a[6],fav:a[7],tree:t});
+const ROLES = {
+ hall:{n:"ホール",e:"🏃",ds:"客の回転を速くする"},
+ kitchen:{n:"キッチン",e:"👨‍🍳",ds:"提供速度を上げる"},
+ caller:{n:"呼び込み",e:"📣",ds:"放置中も自動で集客"},
+ sns:{n:"SNS担当",e:"📱",ds:"バズ確率を底上げ"},
+ manager:{n:"店長",e:"⭐",ds:"全体に薄くボーナス（1人だけ）"},
+};
+const NAMES=["サクラ","タクミ","ミナ","レン","ハルト","ユイ","ソウタ","アオイ","カイト","ヒナ","リク","メイ","ダイチ","ノア","ツムギ"];
+const QUIRKS=["接客の天才","気分屋","早起き","力持ち","SNS中毒","無口だが丁寧","ムードメーカー","倹約家","天然","研究熱心","常連キラー","雨の日に強い"];
+const SEASONS=[{n:"春",e:"🌸"},{n:"夏",e:"🌻"},{n:"秋",e:"🍁"},{n:"冬",e:"⛄"}];
+const BANDS=["朝","昼","夕","夜"]; const BKEY=["a","l","e","n"];
+const DAY_LEN=360; // 6分=1日
+const ACH=[
+ {id:"first",n:"最初の一人",ds:"記念すべき1人目のお客さん",c:s=>s.totalCustomers>=1},
+ {id:"ten",n:"にぎわいの兆し",ds:"通算10人来店",c:s=>s.totalCustomers>=10},
+ {id:"hundred",n:"行列のできる店",ds:"通算100人来店",c:s=>s.totalCustomers>=100},
+ {id:"regu10",n:"顔なじみ",ds:"常連10人",c:s=>totalRegulars()>=10},
+ {id:"allreg",n:"全客層を常連化",ds:"7客層すべてに常連",c:s=>Object.keys(SEGS).every(k=>(s.regulars[k]||0)>0)},
+ {id:"buzz",n:"バズった！",ds:"初めてのバズ",c:s=>s.buzzCount>=1},
+ {id:"buzz10",n:"インフルエンス",ds:"バズ10回",c:s=>s.buzzCount>=10},
+ {id:"man100",n:"売上100万",ds:"総売上100万円",c:s=>s.totalEarned>=1000000},
+ {id:"staff5",n:"チーム名店",ds:"スタッフ5人",c:s=>s.staff.length>=5},
+ {id:"recipe15",n:"レシピコレクター",ds:"レシピ15種",c:s=>s.menu.length>=15},
+ {id:"luxury",n:"高級路線",ds:"豪華・高級内装にする",c:s=>s.interior==="gouka"},
+ {id:"noren1",n:"のれん分け",ds:"初めてののれん分け",c:s=>s.prestiges>=1},
+ {id:"noren3",n:"暖簾の系譜",ds:"のれん分け3回",c:s=>s.prestiges>=3},
+];
+// ---------------- STATE ----------------
+const DEF = ()=>({
+ v:1, money:500, rep:0, totalEarned:0, totalCustomers:0,
+ day:1, t:0, stage:1,
+ interior:"yatai", owned:["yatai"],
+ seats:2, menu:["onigiri"], signature:null,
+ staff:[], regulars:{}, mktUses:{},
+ buzz:0, tasting:0, novelty:0,
+ pending:[], // {type,label,resolveAt(ms)}
+ lastSeen:Date.now(),
+ noren:0, prestiges:0, ach:{}, buzzCount:0,
+ rivalDays:0, storeName:"ぼくの屋台",
+ lifeEarned:0, // 全周回累計
+});
+let S=DEF();
+let seated=[]; // {left,seg,pay} 非保存（軽量）
+let queue=0, cds={}, saveT=0;
+function save(){ S.lastSeen=Date.now(); try{localStorage.setItem("meitenSave",JSON.stringify(S));}catch(e){} }
+function load(){ try{const d=localStorage.getItem("meitenSave"); if(d){S=Object.assign(DEF(),JSON.parse(d));}}catch(e){} }
+// ---------------- HELPERS ----------------
+const $=id=>document.getElementById(id);
+const fmt=n=>"¥"+Math.floor(n).toLocaleString();
+const R=(a,b)=>a+Math.random()*(b-a);
+const RI=(a,b)=>Math.floor(R(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function totalRegulars(){return Object.values(S.regulars).reduce((a,b)=>a+b,0);}
+function intr(){return INTERIORS.find(i=>i.id===S.interior);}
+function band(){return Math.floor(S.t/(DAY_LEN/4));}
+function season(){return SEASONS[Math.floor((S.day-1)/10)%4];}
+function roleStars(r){let s=0;S.staff.forEach(st=>{if(st.role===r)s+=st.stars});return s;}
+function norenMult(){return 1+S.noren*0.10;}
+function mgrMult(){return roleStars("manager")>0?1+0.03*roleStars("manager"):1;}
+function fatigue(key){const u=S.mktUses[key]||0;return Math.pow(0.82,u);}
+// ---------------- ECONOMY ----------------
+function ownedByCat(cat){return S.menu.map(id=>ITEM[id]).filter(i=>i&&i.cat===cat);}
+function avgTicket(segKey){
+  const seg=SEGS[segKey];
+  const mains=ownedByCat("main"); if(!mains.length) return 0;
+  let m=pick(mains);
+  if(S.signature&&ITEM[S.signature]&&ITEM[S.signature].cat==="main"&&Math.random()<0.5) m=ITEM[S.signature];
+  let v=(m.price-m.cost);
+  if(S.signature===m.id) v*=1.3;
+  const add=(cat,p)=>{const l=ownedByCat(cat);if(l.length&&Math.random()<p){const it=pick(l);let d=it.price-it.cost;if(season().n==="夏"&&cat==="drink")d*=1.5;if(S.signature===it.id)d*=1.3;v+=d;}};
+  add("drink",0.55);add("side",0.35);add("dess",segKey==="family"||segKey==="couple"?0.5:0.25);
+  v*=seg.mult*(1+intr().tier*0.04)*norenMult()*mgrMult();
+  return Math.max(20,v);
+}
+function pickSegment(){
+  const bk=BKEY[band()], af=intr().af, w=[];
+  for(const k in SEGS){
+    let x=SEGS[k].tw[bk]*(af[k]||0.7);
+    if(k==="influ") x*=0.15;
+    if(S.signature&&ITEM[S.signature].fav===k) x*=2.0;
+    if(season().n==="冬"&&k==="family") x*=1.3;
+    if((S.regulars[k]||0)>0) x*=1+0.05*S.regulars[k];
+    w.push([k,x]);
+  }
+  const tot=w.reduce((a,b)=>a+b[1],0); let r=Math.random()*tot;
+  for(const [k,x] of w){r-=x;if(r<=0)return k;}
+  return "salaryman";
+}
+function serveTime(){
+  return Math.max(4,12/(1+0.08*roleStars("kitchen")+0.05*roleStars("hall")));
+}
+function arrivalRate(){ // 到着確率/秒
+  let r=0.015+0.004*totalRegulars()+0.010*roleStars("caller");
+  r*=1+(S.rep/2000); // 評判の下支え（基礎点）
+  if(S.buzz>0) r+=0.45;
+  if(S.novelty>0) r*=1.25;
+  if(S.rivalDays>0) r*=0.65;
+  if(festivalToday()) r*=2;
+  r*=norenMult()*mgrMult();
+  return Math.min(r,1.5);
+}
+function festivalToday(){return S.day%7===0&&S.stage>=2;}
+// ---------------- SIM ----------------
+function arrive(n,src){
+  for(let i=0;i<n;i++){
+    const seg=pickSegment();
+    if(seated.length<S.seats){seated.push({left:serveTime(),seg});scnEnter(seg);}
+    else if(queue<3+Math.floor(roleStars("hall")/2)){queue++;scnEnter(seg);}
+    else {log("満席で "+SEGS[seg].n+" が帰ってしまった…");scnLeave(seg);continue;}
+  }
+  renderStore();
+}
+function finishCustomer(seg){
+  const pay=avgTicket(seg);
+  S.money+=pay; S.totalEarned+=pay; S.lifeEarned+=pay;
+  earnLog.push([Date.now(),pay]); scnExit(seg,pay);
+  S.rep+=1+SEGS[seg].wom*0.3; S.totalCustomers++;
+  // 常連化
+  let rc=SEGS[seg].reg*(S.tasting>0?2:1)*(1+intr().tier*0.05);
+  if((S.regulars[seg]||0)<25&&Math.random()<rc){
+    S.regulars[seg]=(S.regulars[seg]||0)+1;
+    if(Math.random()<0.4)log(SEGS[seg].n+"が常連になった！","good");
+  }
+  // インフルエンサー満足→バズ
+  if(seg==="influ"&&(S.signature||intr().tier>=3)&&Math.random()<0.6) triggerBuzz("インフルエンサーが投稿！");
+  // ひらめきレシピ
+  if(Math.random()<0.004){
+    const tree=TREES[intr().cui].map(a=>a[0]).filter(id=>!S.menu.includes(id));
+    if(tree.length){const id=pick(tree);S.menu.push(id);log("ひらめき！レアレシピ「"+ITEM[id].n+"」を習得！","big");toast("💡 新レシピ習得！");navAlert("menu");}
+  }
+  checkStage();
+}
+function triggerBuzz(msg){
+  S.buzz=90;S.buzzCount++;
+  log(msg+" バズ発生！行列ができる！","big");
+  toast("🔥 バズった！！",true);
+}
+function tick(){
+  // 時刻
+  S.t++; if(S.t>=DAY_LEN){S.t=0;endDay();}
+  if(S.buzz>0)S.buzz--; if(S.tasting>0)S.tasting--;
+  if(S.novelty>0)S.novelty-=1/DAY_LEN;
+  // 到着
+  if(Math.random()<arrivalRate()) arrive(S.buzz>0?RI(1,2):1);
+  // 提供
+  for(let i=seated.length-1;i>=0;i--){
+    seated[i].left--;
+    if(seated[i].left<=0){finishCustomer(seated[i].seg);seated.splice(i,1);}
+  }
+  while(queue>0&&seated.length<S.seats){queue--;seated.push({left:serveTime(),seg:pickSegment()});}
+  // クールダウン
+  for(const k in cds)if(cds[k]>0)cds[k]--;
+  // 仕込み結果の解決
+  resolvePending(false);
+  // UI
+  renderTop();renderStore();updateCds();
+  if(++saveT>=5){saveT=0;save();checkAch();}
+}
+function endDay(){
+  S.day++; S.mktUses={};
+  // 経費（第3段階から）
+  if(S.stage>=3){
+    const rent=200+intr().tier*150;
+    const wages=S.staff.reduce((a,s)=>a+s.wage,0);
+    const c=rent+wages;
+    S.money=Math.max(0,S.money-c);
+    log("経費支払い：家賃"+fmt(rent)+" 人件費"+fmt(wages));
+    // ライバル
+    if(S.rivalDays>0){S.rivalDays--;if(S.rivalDays===0)log("ライバル店のキャンペーンが終わった","good");}
+    else if(Math.random()<0.25){S.rivalDays=1;log("近所のライバル店がキャンペーン開始！客足に影響が…","big");toast("⚔️ ライバル出現！");}
+  }
+  // スタッフ成長
+  S.staff.forEach(st=>{st.xp=(st.xp||0)+1;if(st.xp>=3&&st.stars<5){st.xp=0;st.stars+=0.5;log(st.name+"が成長した！（★"+st.stars+"）","good");}});
+  if(festivalToday())log("今日はお祭り！客数アップ！","big");
+  if((S.day-1)%10===0)log(season().e+" 季節が"+season().n+"になった");
+}
+function checkStage(){
+  if(S.stage===1&&S.totalCustomers>=10){S.stage=2;stageUp(2,"チラシ・SNS・試食が解放！ここから確率の世界。当たれば行列、外せば普通。");}
+  if(S.stage===2&&S.totalCustomers>=150){S.stage=3;stageUp(3,"店が有名になり、家賃・人件費が発生。ライバルも現れる。仕込み5：運5、本番はここから。");}
+}
+function stageUp(n,msg){
+  modal(`<h2>第${n}段階へ！</h2><p style="font-size:13px;line-height:1.8;color:#555">${msg}</p>
+  <button class="btn acc" style="margin-top:16px" onclick="closeModal()">よし、やるぞ</button>`);
+  renderAll();
+}
+// ---------------- MARKETING（仕込み5：運5） ----------------
+const MKT={
+ yobikomi:{n:"呼び込み",e:"📣",cd:8,stage:1,cost:0,
+   go(){
+     const p=S.stage===1?0.95:0.55*fatigue("yobikomi")+0.1;
+     S.mktUses.yobikomi=(S.mktUses.yobikomi||0)+1;
+     if(Math.random()<p){const n=S.stage===1?RI(1,2):RI(1,3);arrive(n);log("呼び込み成功！"+n+"人が入店","good");}
+     else{S.rep+=1;log("呼び込み…素通りされた（評判+1）");}
+   }},
+ chirashi:{n:"チラシ配り",e:"📄",cd:30,stage:2,cost:100,
+   go(){
+     S.mktUses.chirashi=(S.mktUses.chirashi||0)+1;
+     S.pending.push({type:"chirashi",at:Date.now()+60000,f:fatigue("chirashi")});
+     log("チラシを配った。効果はしばらく後のお楽しみ…");
+   }},
+ shishoku:{n:"試食コーナー",e:"🍴",cd:60,stage:2,cost:150,
+   go(){S.tasting=120;log("試食コーナー設置！2分間、常連になる確率2倍","good");}},
+ sns:{n:"SNS投稿",e:"📱",cd:45,stage:2,cost:0,
+   go(){
+     S.mktUses.sns=(S.mktUses.sns||0)+1;
+     S.pending.push({type:"sns",at:Date.now()+45000,f:fatigue("sns")});
+     log("SNSに投稿した。バズるか、スベるか…");
+   }},
+};
+function resolvePending(offline){
+  const now=Date.now(), out=[];
+  S.pending=S.pending.filter(p=>{
+    if(p.at>now){return true;}
+    let res;
+    if(p.type==="chirashi"){
+      const r=Math.random();
+      if(r<0.15*p.f){res={t:"🎉 チラシ大当たり！近所で話題に",hit:2};if(!offline){arrive(RI(6,9));}else res.n=RI(6,9);}
+      else if(r<0.15*p.f+0.45){res={t:"チラシ当たり。数人が来てくれた",hit:1};if(!offline){arrive(RI(2,4));}else res.n=RI(2,4);}
+      else{res={t:"チラシ…反応なし（評判+5）",hit:0};S.rep+=5;}
+    }else if(p.type==="sns"){
+      const p2=(0.08+0.025*roleStars("sns")+(["asian","showa","modern"].includes(S.interior)?0.04:0))*p.f+(S.tasting>0?0.02:0);
+      if(Math.random()<p2){res={t:"🔥 SNSがバズった！！",hit:2};if(!offline)triggerBuzz("投稿が拡散！");else{res.n=RI(10,16);S.buzzCount++;}}
+      else{res={t:"SNS投稿…いいね3件（評判+3）",hit:0};S.rep+=3;}
+    }
+    if(res){out.push(res);if(!offline)log(res.t,res.hit===2?"big":res.hit===1?"good":"");}
+    return false;
+  });
+  return out;
+}
+// ---------------- OFFLINE / 開封 ----------------
+function offlineSettle(){
+  const gap=(Date.now()-S.lastSeen)/1000;
+  if(gap<60) return;
+  const cap=Math.min(gap,4*3600);
+  const mkt=resolvePending(true);
+  let rate=arrivalRate()*(0.25+Math.min(0.35,0.12*roleStars("caller")));
+  let extra=0; mkt.forEach(m=>{if(m.n)extra+=m.n;});
+  const n=Math.floor(rate*cap*0.5)+extra;
+  let earned=0;
+  const segKeys=Object.keys(SEGS);
+  for(let i=0;i<Math.min(n,2000);i++){
+    const sg=pickSegment(); earned+=avgTicket(sg);
+    if(Math.random()<SEGS[sg].reg*0.5&&(S.regulars[sg]||0)<25)S.regulars[sg]=(S.regulars[sg]||0)+1;
+  }
+  S.money+=earned;S.totalEarned+=earned;S.lifeEarned+=earned;
+  S.rep+=n;S.totalCustomers+=n;checkStage();
+  const h=Math.floor(cap/3600),m=Math.floor(cap%3600/60);
+  const timeTxt=(h>0?h+"時間":"")+m+"分";
+  modal(`<div id="envelope" onclick="openEnvelope()">
+    <span class="env">✉️</span>
+    <p>おかえり！ ${timeTxt}のあいだ、お店は営業してたよ。<br><b>タップして開封</b></p>
+  </div>`,true);
+  window._envData={earned,n,mkt};
+}
+function openEnvelope(){
+  const d=window._envData;
+  let mktHtml=d.mkt.map(m=>`<div class="resultLine ${m.hit===2?"hit":m.hit===0?"miss":""}">${m.t}${m.n?"（+"+m.n+"人）":""}</div>`).join("");
+  if(!mktHtml)mktHtml="";
+  modal(`<div class="reveal">
+    <div class="sub">たまってた売上</div>
+    <div class="amt">${fmt(d.earned)}</div>
+    <div class="sub">お客さん ${d.n}人が来てくれた</div>
+    ${mktHtml?'<hr class="hr">'+mktHtml:""}
+    <button class="btn acc" style="margin-top:14px" onclick="closeModal()">回収する</button>
+  </div>`,true);
+  save();renderAll();
+}
+// ---------------- UI ----------------
+let curPg="store";
+function nav(pg){
+  curPg=pg;
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("on"));
+  $("pg-"+pg).classList.add("on");
+  document.querySelectorAll("#nav button").forEach(b=>{
+    b.classList.toggle("on",b.dataset.pg===pg);
+    if(b.dataset.pg===pg)b.classList.remove("alert");
+  });
+  renderAll();
+}
+function navAlert(pg){document.querySelectorAll("#nav button").forEach(b=>{if(b.dataset.pg===pg&&curPg!==pg)b.classList.add("alert");});}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>nav(b.dataset.pg));
+function renderTop(){
+  $("money").innerHTML="<small>所持金</small>"+fmt(S.money);
+  $("rep").innerHTML="<small>評判</small>"+Math.floor(S.rep).toLocaleString();
+  $("storeName").textContent=S.storeName;
+  $("stageBadge").textContent="第"+S.stage+"段階";
+  $("clock").textContent=S.day+"日目 "+BANDS[band()];
+  const sn=$("noren");
+  if(S.noren>0){sn.style.display="";sn.innerHTML="<small>のれん</small>"+S.noren;}
+  const se=season();
+  $("seasonTxt").textContent=se.e+" "+se.n;
+  $("eventFlash").textContent=S.rivalDays>0?"⚔️ ライバル店キャンペーン中":festivalToday()?"🎆 お祭り開催中！":S.buzz>0?"🔥 バズ中！":"";
+}
+function renderStore(){
+  if(curPg!=="store")return;
+  const row=$("seatRow");
+  let html="";
+  for(let i=0;i<S.seats;i++){
+    const c=seated[i];
+    html+=`<div class="seat ${c?"full":""}">${c?SEGS[c.seg].e:""}</div>`;
+  }
+  row.innerHTML=html;
+  $("queueLine").innerHTML=queue>0?`🚶 行列 <b>${queue}人</b> 待ち中…`:(seated.length===0?"お客さんを待っている…（仕込みで呼ぼう）":"");
+  // stage progress
+  let goal,txt;
+  if(S.stage===1){goal=10;txt=`まずは10人呼ぼう！（${S.totalCustomers}/10）呼び込みはほぼ確実に成功する`;}
+  else if(S.stage===2){goal=150;txt=`常連とクチコミの時代（通算${S.totalCustomers}/150人で第3段階）`;}
+  else{goal=null;txt="経営本番。コストとライバルに負けるな";}
+  $("stageHint").textContent=txt;
+  $("stageProg").style.width=goal?Math.min(100,S.totalCustomers/goal*100)+"%":"100%";
+  renderMkt();
+}
+function renderMkt(){
+  const g=$("mktBtns");
+  if(g.dataset.built!==String(S.stage)){
+    g.dataset.built=String(S.stage);g.innerHTML="";
+    for(const k in MKT){const m=MKT[k];
+      if(m.stage>S.stage)continue;
+      const b=document.createElement("button");
+      b.className="btn"+(k==="yobikomi"?" acc":"");b.id="mkt-"+k;
+      b.innerHTML=`${m.e} ${m.n}<small>${m.cost>0?"¥"+m.cost:"無料"}・CT${m.cd}秒</small><div class="cd"></div>`;
+      b.onclick=()=>useMkt(k);
+      g.appendChild(b);
+    }
+    $("mktNote").textContent=S.stage===1?"第2段階でチラシ・試食・SNSが解放される":"同じ手を使いすぎると効きが鈍る（毎日リセット）";
+  }
+}
+function useMkt(k){
+  const m=MKT[k];
+  if(cds[k]&&cds[k]>0)return;
+  if(S.money<m.cost){toast("お金が足りない…");return;}
+  S.money-=m.cost;cds[k]=m.cd;m.go();renderTop();updateCds();
+}
+function updateCds(){
+  for(const k in MKT){
+    const b=$("mkt-"+k);if(!b)continue;
+    const on=cds[k]>0;
+    b.disabled=on||S.money<MKT[k].cost;
+    b.querySelector(".cd").style.width=on?(cds[k]/MKT[k].cd*100)+"%":"0%";
+  }
+}
+const logArr=[];
+function log(msg,cls){
+  logArr.unshift({msg,cls});if(logArr.length>7)logArr.pop();
+  const el=$("log");if(el)el.innerHTML=logArr.map(l=>`<li class="${l.cls||""}">${l.msg}</li>`).join("");
+}
+let toastT=null;
+function toast(msg,buzz){
+  const t=$("toast");t.textContent=msg;t.className="on"+(buzz?" buzz":"");
+  clearTimeout(toastT);toastT=setTimeout(()=>t.className="",2200);
+}
+function modal(html,noClose){
+  $("modal").innerHTML=html;$("modalWrap").classList.add("on");
+  $("modalWrap").onclick=noClose?null:(e)=>{if(e.target.id==="modalWrap")closeModal();};
+}
+function closeModal(){$("modalWrap").classList.remove("on");}
+// ----- menu page -----
+function renderMenu(){
+  const cui=intr().cui;
+  $("menuTreeTitle").textContent="メニュー開発 — "+intr().n+"系";
+  const catN={main:"主食",side:"一品",dess:"デザート",drink:"ドリンク"};
+  let html="";
+  TREES[cui].forEach(a=>{
+    const it=ITEM[a[0]],own=S.menu.includes(it.id);
+    const sig=S.signature===it.id;
+    html+=`<div class="rowItem"><div class="ic">${it.e}</div>
+    <div class="bd"><div class="nm">${it.n}<span class="tag">${catN[it.cat]}</span>${sig?'<span class="tag sig">看板</span>':""}</div>
+    <div class="ds">売価${fmt(it.price)}／${SEGS[it.fav].n}に人気</div></div>
+    <div class="ac">${own?(it.cat==="main"&&!sig?`<button class="btn small ghost" onclick="setSig('${it.id}')">看板に</button>`:'<span class="tag on">提供中</span>'):`<button class="btn small" ${S.money<it.unlock?"disabled":""} onclick="buyItem('${it.id}')">${fmt(it.unlock)}</button>`}</div></div>`;
+  });
+  $("menuList").innerHTML=html;
+  const other=S.menu.filter(id=>ITEM[id].tree!==cui);
+  $("ownedOther").innerHTML=other.length?other.map(id=>`<span class="tag">${ITEM[id].e} ${ITEM[id].n}</span>`).join(" "):'<span class="lockNote">まだない（内装を替えると別ジャンルが開発できる）</span>';
+}
+function buyItem(id){
+  const it=ITEM[id];if(S.money<it.unlock)return;
+  S.money-=it.unlock;S.menu.push(id);
+  log("新メニュー「"+it.n+"」を開発！","good");toast(it.e+" "+it.n+" 開発！");
+  if(!S.signature&&it.cat==="main")setSig(id,true);
+  renderAll();save();
+}
+function setSig(id,silent){
+  S.signature=id;
+  if(!silent){log("看板メニューを「"+ITEM[id].n+"」に！ "+SEGS[ITEM[id].fav].n+"を強く引き寄せる","good");}
+  renderAll();save();
+}
+// ----- interior page -----
+function renderInterior(){
+  let html="";
+  INTERIORS.forEach(it=>{
+    const own=S.owned.includes(it.id),cur=S.interior===it.id;
+    html+=`<div class="rowItem"><div class="ic">${it.e}</div>
+    <div class="bd"><div class="nm">${it.n}${cur?'<span class="tag on">営業中</span>':""}</div><div class="ds">${it.ds}</div></div>
+    <div class="ac">${cur?"":own?`<button class="btn small ghost" onclick="setInterior('${it.id}')">替える</button>`:`<button class="btn small" ${S.money<it.cost?"disabled":""} onclick="buyInterior('${it.id}')">${fmt(it.cost)}</button>`}</div></div>`;
+  });
+  $("interiorList").innerHTML=html;
+  // facilities
+  const seatCost=Math.floor(300*Math.pow(2,S.seats-2));
+  let fh=`<div class="rowItem"><div class="ic">🪑</div><div class="bd"><div class="nm">席を増やす（現在${S.seats}席）</div><div class="ds">同時に座れる客が増える</div></div>
+  <div class="ac">${S.seats>=10?'<span class="tag">MAX</span>':`<button class="btn small" ${S.money<seatCost?"disabled":""} onclick="buySeat()">${fmt(seatCost)}</button>`}</div></div>`;
+  if(S.stage>=3){
+    fh+=`<div class="rowItem"><div class="ic">✨</div><div class="bd"><div class="nm">店舗リニューアル</div><div class="ds">ライバル効果を打ち消し、2日間 集客+25%</div></div>
+    <div class="ac"><button class="btn small" ${S.money<2000?"disabled":""} onclick="renovate()">${fmt(2000)}</button></div></div>`;
+  }
+  $("facilityList").innerHTML=fh;
+}
+function buyInterior(id){
+  const it=INTERIORS.find(i=>i.id===id);if(S.money<it.cost)return;
+  S.money-=it.cost;S.owned.push(id);setInterior(id);
+  toast(it.e+" "+it.n+"に模様替え！");
+}
+function setInterior(id){
+  S.interior=id;S.novelty=1;
+  log("内装を「"+intr().n+"」に模様替え！新しいメニューツリーが解放","good");
+  checkAch();renderAll();save();
+}
+function buySeat(){
+  const c=Math.floor(300*Math.pow(2,S.seats-2));if(S.money<c||S.seats>=10)return;
+  S.money-=c;S.seats++;log("席が増えた！（"+S.seats+"席）","good");renderAll();save();
+}
+function renovate(){
+  if(S.money<2000)return;S.money-=2000;S.rivalDays=0;S.novelty=2;
+  log("リニューアルオープン！話題を取り戻した","big");toast("✨ リニューアル！");renderAll();save();
+}
+// ----- staff page -----
+function renderStaff(){
+  const wages=S.staff.reduce((a,s)=>a+s.wage,0);
+  $("wageTag").textContent=S.staff.length?("人件費 "+fmt(wages)+"/日"+(S.stage<3?"（第3段階から発生）":"")):"";
+  if(!S.staff.length){$("staffList").innerHTML='<span class="lockNote">まだ誰もいない。ひとり店主がんばれ！</span>';return;}
+  $("staffList").innerHTML=S.staff.map((st,i)=>`<div class="rowItem"><div class="ic">${ROLES[st.role].e}</div>
+  <div class="bd"><div class="nm">${st.name}<span class="tag">${ROLES[st.role].n}</span></div>
+  <div class="ds"><span class="starTxt">${"★".repeat(Math.floor(st.stars))}${st.stars%1?"½":""}</span> ${st.quirk}／日給${fmt(st.wage)}</div></div>
+  <div class="ac"><button class="btn small ghost" onclick="fireStaff(${i})">解雇</button></div></div>`).join("");
+}
+$("recruitBtn").onclick=()=>{
+  if(S.money<300){toast("お金が足りない…");return;}
+  S.money-=300;
+  const apps=[];
+  for(let i=0;i<3;i++){
+    const roles=Object.keys(ROLES).filter(r=>r!=="manager"||!S.staff.some(s=>s.role==="manager"));
+    const r=Math.random(),stars=r<0.30?1:r<0.60?2:r<0.85?3:r<0.97?4:5;
+    apps.push({name:pick(NAMES),role:pick(roles),stars,quirk:pick(QUIRKS),wage:60*stars+40,xp:0});
+  }
+  window._apps=apps;
+  modal(`<h2>面接（応募者3名）</h2>`+apps.map((a,i)=>`<div class="rowItem"><div class="ic">${ROLES[a.role].e}</div>
+  <div class="bd"><div class="nm">${a.name}<span class="tag">${ROLES[a.role].n}</span></div>
+  <div class="ds"><span class="starTxt">${"★".repeat(a.stars)}</span> ${a.quirk}／日給${fmt(a.wage)}</div></div>
+  <div class="ac"><button class="btn small acc" onclick="hire(${i})">採用</button></div></div>`).join("")+
+  `<button class="btn ghost" style="margin-top:12px" onclick="closeModal()">今回は見送る</button>`);
+  renderTop();save();
+};
+function hire(i){
+  const a=window._apps[i];S.staff.push(a);
+  log(a.name+"を採用！（"+ROLES[a.role].n+"）","good");
+  if(a.stars>=4)toast("🎉 当たり店員だ！！",true);else toast(a.name+" 加入！");
+  closeModal();checkAch();renderAll();save();
+}
+function fireStaff(i){
+  log(S.staff[i].name+"が店を去った…");S.staff.splice(i,1);renderAll();save();
+}
+// ----- etc page -----
+function renderEtc(){
+  $("nameEdit").value=S.storeName;
+  $("storeStats").innerHTML=
+   `通算来店 <b>${S.totalCustomers.toLocaleString()}人</b>／総売上 <b>${fmt(S.totalEarned)}</b><br>`+
+   `のれん分け ${S.prestiges}回／全周回累計 ${fmt(S.lifeEarned)}`;
+  const tr=totalRegulars();
+  $("regularList").innerHTML=tr?Object.keys(SEGS).filter(k=>S.regulars[k]).map(k=>
+   `<span class="tag">${SEGS[k].e} ${SEGS[k].n} ×${S.regulars[k]}</span>`).join(" ")
+   :'<span class="lockNote">まだいない。味と内装を磨けば常連がつく</span>';
+  $("achList").innerHTML=ACH.map(a=>{
+    const got=S.ach[a.id];
+    return `<div class="rowItem"><div class="ic">${got?"🏅":"🔒"}</div>
+    <div class="bd"><div class="nm" style="${got?"":"color:var(--sub)"}">${got?a.n:"？？？"}</div><div class="ds">${a.ds}</div></div></div>`;
+  }).join("");
+  // prestige
+  const can=S.totalEarned>=500000;
+  $("prestigeCard").style.display=(S.stage>=3||S.prestiges>0)?"":"none";
+  const gain=Math.max(1,Math.floor(Math.sqrt(S.totalEarned/500000)));
+  $("prestigeBtn").disabled=!can;
+  $("prestigeBtn").textContent=can?`のれん分けする（のれん +${gain}）`:`総売上50万で解放（現在 ${fmt(S.totalEarned)}）`;
+}
+$("nameEdit").onchange=e=>{S.storeName=e.target.value||"ぼくの屋台";renderTop();save();};
+$("prestigeBtn").onclick=()=>{
+  const gain=Math.max(1,Math.floor(Math.sqrt(S.totalEarned/500000)));
+  modal(`<h2>のれん分け</h2><p style="font-size:13px;line-height:1.8;color:#555">
+  「${S.storeName}」を弟子に譲り、新天地で屋台からやり直す。<br>
+  <b style="color:var(--gold)">のれん +${gain}</b>（永久に集客・売上 +${gain*10}%）<br>称号・実績は引き継ぐ。</p>
+  <button class="btn acc" style="margin-top:14px" onclick="doPrestige(${gain})">継承する</button>
+  <button class="btn ghost" style="margin-top:8px" onclick="closeModal()">やめておく</button>`);
+};
+function doPrestige(gain){
+  const keep={noren:S.noren+gain,prestiges:S.prestiges+1,ach:S.ach,buzzCount:S.buzzCount,lifeEarned:S.lifeEarned,storeName:S.storeName};
+  S=Object.assign(DEF(),keep);
+  seated=[];queue=0;cds={};logArr.length=0;
+  closeModal();checkAch();
+  log("のれん分け！新天地で屋台から再スタート（のれん"+S.noren+"）","big");
+  toast("🎊 のれん "+S.noren+" 継承！",true);
+  document.querySelector("#mktBtns").dataset.built="";
+  renderAll();save();
+}
+$("cardBtn").onclick=()=>{
+  const it=intr(),sig=S.signature?ITEM[S.signature]:null;
+  const titles=ACH.filter(a=>S.ach[a.id]).length;
+  const txt=`【店カード】${S.storeName}\n${it.e} ${it.n}／看板:${sig?sig.n:"なし"}\n総売上 ${fmt(S.totalEarned)}／来店 ${S.totalCustomers}人\n称号 ${titles}/${ACH.length}／のれん ${S.noren}\n#名店ものがたり`;
+  modal(`<h2>店カード</h2>
+  <div class="card" style="text-align:center;background:linear-gradient(160deg,#fffdf8,#f4efe6);margin:0 0 12px">
+    <div style="font-size:44px">${it.e}</div>
+    <div style="font-size:17px;font-weight:800;margin:4px 0">${S.storeName}</div>
+    <div style="font-size:11px;color:var(--sub)">${it.n}${sig?"／看板メニュー「"+sig.n+"」":""}</div>
+    <hr class="hr">
+    <div style="display:flex;justify-content:space-around;font-size:11px;color:var(--sub)">
+      <div><div class="bigNum" style="font-size:16px;color:var(--ink)">${fmt(S.totalEarned)}</div>総売上</div>
+      <div><div class="bigNum" style="font-size:16px;color:var(--ink)">${S.totalCustomers}</div>来店数</div>
+      <div><div class="bigNum" style="font-size:16px;color:var(--gold)">${titles}</div>称号</div>
+    </div>
+  </div>
+  <button class="btn" onclick="copyCard()">テキストをコピーしてシェア</button>`);
+  window._cardTxt=txt;
+};
+function copyCard(){
+  const t=window._cardTxt;
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>toast("📋 コピーした！"));}
+  else{toast("コピー非対応の環境みたい");}
+}
+function checkAch(){
+  ACH.forEach(a=>{
+    if(!S.ach[a.id]&&a.c(S)){
+      S.ach[a.id]=true;
+      toast("🏅 称号獲得「"+a.n+"」",true);log("称号「"+a.n+"」を獲得！","big");
+      navAlert("etc");
+    }
+  });
+}
+function renderAll(){
+  renderTop();
+  if(curPg==="store")renderStore();
+  if(curPg==="menu")renderMenu();
+  if(curPg==="interior")renderInterior();
+  if(curPg==="staff")renderStaff();
+  if(curPg==="etc")renderEtc();
+}
+// ---------------- TOWN SCENE（町マップ） ----------------
+const earnLog=[];
+const TW_W=1750, TW_SX=830, TW_SW=180;
+const TOWN={cam:null,walkers:[],parts:[],fw:[],floats:[],last:0,car:{x:-60,dir:1,e:"🚗"},drag:null,dragMoved:false};
+const BLD=[
+ {x:15,w:135,h:80,c:"#aeb9c6",sign:"🚉",label:"えき"},
+ {x:195,w:82,h:60,c:"#dccbb0",sign:"🏠"},
+ {x:310,w:96,h:66,c:"#c8d4bc",sign:"🏪",label:"コンビニ"},
+ {park:true,x:440,w:130},
+ {x:600,w:80,h:58,c:"#d5c5ab",sign:"🏠"},
+ {x:710,w:72,h:66,c:"#c9b3ab",sign:"⛩️",label:"じんじゃ"},
+ // ← ここに自分の店（TW_SX）
+ {x:1060,w:92,h:86,c:"#b6bdd0",sign:"🏢",label:"オフィス"},
+ {x:1185,w:80,h:58,c:"#dccbb0",sign:"🏠"},
+ {x:1295,w:120,h:72,c:"#cfb4b4",sign:"🍜",label:"ライバル亭",rival:true},
+ {x:1450,w:92,h:62,c:"#e2d5ba",sign:"🥐",label:"パンや"},
+ {park:true,x:1580,w:140},
+];
+const WALL={yatai:"#e0a84f",taishu:"#d9a066",yofu:"#e6d9c5",wafu:"#cfc3a8",cafe:"#c9a685",italian:"#e2c3a0",showa:"#d9b38c",diner:"#e88f7a",asian:"#b8c98f",neon:"#5a5f7a",modern:"#9aa0a6",gouka:"#d8c690"};
+const AMBIENT=["🚶","🚶‍♀️","🧍","👩","🧑","👨‍🦳","🧒","🐈"];
+const SKY={0:["#ffe3c9","#fff6e8"],1:["#c9e4ff","#f0faff"],2:["#ffc490","#ffe8cf"],3:["#1b2140","#33406b"]};
+function scnEnter(seg){ // 実際の客：店へ歩いて入る
+  const side=Math.random()<0.5?-1:1;
+  TOWN.walkers.push({x:TW_SX+TW_SW/2+side*(150+Math.random()*140),e:SEGS[seg].e,sp:55+Math.random()*35,state:"to",bob:Math.random()*9});
+}
+function scnLeave(seg){ // 満席で帰る客
+  TOWN.walkers.push({x:TW_SX+TW_SW/2,e:SEGS[seg].e,sp:60,state:"away",dir:Math.random()<0.5?-1:1,bob:Math.random()*9,angry:true});
+}
+function scnExit(seg,pay){ // 会計した客：お金演出＋店から出て歩き去る
+  TOWN.floats.push({x:TW_SX+TW_SW/2,y:96,txt:"+"+fmt(pay),age:0});
+  TOWN.walkers.push({x:TW_SX+TW_SW/2,e:SEGS[seg].e,sp:45+Math.random()*25,state:"away",dir:Math.random()<0.5?-1:1,bob:Math.random()*9,happy:true});
+}
+function bustleLv(){
+  const r=arrivalRate();
+  return r<0.05?0:r<0.13?1:r<0.28?2:r<0.55?3:4;
+}
+function scnUpdate(dt){
+  const r=arrivalRate();
+  // 通行人スポーン（繁盛度＝人通りで見える）
+  let p=(0.25+r*1.8+(festivalToday()?0.6:0))*dt;
+  if(band()===3)p*=(S.interior==="neon"?1.1:0.5);
+  if(S.buzz>0)p+=1.2*dt;
+  if(Math.random()<p&&TOWN.walkers.length<42){
+    const fromL=Math.random()<0.5;
+    const useSeg=Math.random()<0.35;
+    TOWN.walkers.push({x:fromL?-15:TW_W+15,e:useSeg?SEGS[pickSegment()].e:pick(AMBIENT),sp:25+Math.random()*30,state:"walk",dir:fromL?1:-1,bob:Math.random()*9});
+  }
+  const door=TW_SX+TW_SW/2;
+  for(let i=TOWN.walkers.length-1;i>=0;i--){
+    const w=TOWN.walkers[i];
+    if(w.state==="to"){
+      const d=door-w.x; w.x+=Math.sign(d)*w.sp*dt;
+      if(Math.abs(d)<5){TOWN.parts.push({x:door,y:150,vy:-25,age:0,txt:"✨"});TOWN.walkers.splice(i,1);}
+    }else{
+      w.x+=w.dir*w.sp*dt;
+      if(w.x<-30||w.x>TW_W+30)TOWN.walkers.splice(i,1);
+    }
+  }
+  // 車
+  const c=TOWN.car; c.x+=c.dir*95*dt;
+  if(c.x>TW_W+80){c.dir=-1;c.e=pick(["🚗","🚕","🚌","🛵"]);}
+  if(c.x<-80){c.dir=1;c.e=pick(["🚗","🚚","🚙"]);}
+  // 季節パーティクル
+  const se=season().n;
+  if((se==="春"||se==="秋"||se==="冬")&&Math.random()<0.25&&TOWN.parts.length<50){
+    TOWN.parts.push({x:Math.random()*TW_W,y:-5,vy:se==="冬"?18:28,vx:se==="冬"?8:-14,age:0,fall:true,
+      col:se==="春"?"#ffb7c5":se==="秋"?"#e08b3e":"#ffffff"});
+  }
+  for(let i=TOWN.parts.length-1;i>=0;i--){
+    const pt=TOWN.parts[i];pt.age+=dt;
+    pt.y+=(pt.vy||0)*dt;pt.x+=(pt.vx||0)*dt;
+    if(pt.age>(pt.fall?9:0.9))TOWN.parts.splice(i,1);
+  }
+  for(let i=TOWN.floats.length-1;i>=0;i--){
+    const f=TOWN.floats[i];f.age+=dt;f.y-=18*dt;
+    if(f.age>1.4)TOWN.floats.splice(i,1);
+  }
+  // 花火（お祭りの夜）
+  if(festivalToday()&&band()===3&&Math.random()<0.02)
+    TOWN.fw.push({x:200+Math.random()*(TW_W-400),y:30+Math.random()*40,age:0,col:pick(["#ff8a5c","#ffd166","#7ae0c3","#b39cff"])});
+  for(let i=TOWN.fw.length-1;i>=0;i--){TOWN.fw[i].age+=dt;if(TOWN.fw[i].age>1.1)TOWN.fw.splice(i,1);}
+}
+function scnDraw(){
+  const cv=$("town"),ctx=cv.getContext("2d");
+  const dpr=window.devicePixelRatio||1,w=cv.clientWidth,h=210;
+  if(cv.width!==Math.floor(w*dpr)){cv.width=Math.floor(w*dpr);cv.height=Math.floor(h*dpr);}
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  if(TOWN.cam===null)TOWN.cam=TW_SX+TW_SW/2-w/2;
+  TOWN.cam=Math.max(0,Math.min(TW_W-w,TOWN.cam));
+  const cam=TOWN.cam,night=band()===3,dusk=band()===2;
+  // 空
+  const g=ctx.createLinearGradient(0,0,0,h);
+  const sky=SKY[band()];g.addColorStop(0,sky[0]);g.addColorStop(1,sky[1]);
+  ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  ctx.textBaseline="alphabetic";
+  // 星・太陽・月
+  ctx.font="14px serif";
+  if(night){ctx.fillStyle="rgba(255,255,240,.8)";for(let i=0;i<24;i++){const sx=(i*173+((i*89)%97))%TW_W;ctx.fillRect(sx-cam,(i*53)%70+6,1.6,1.6);}ctx.font="22px serif";ctx.fillText("🌙",w-46,34);}
+  else{ctx.font="24px serif";ctx.fillText(band()===0?"🌅":dusk?"🌇":"☀️",w-48,36);}
+  // 遠景の山
+  ctx.fillStyle=night?"rgba(45,55,90,.7)":"rgba(150,170,150,.35)";
+  ctx.beginPath();ctx.moveTo(0,120);
+  for(let x=0;x<=w;x+=40){ctx.lineTo(x,105+Math.sin((x+cam)*0.008)*14);}
+  ctx.lineTo(w,120);ctx.closePath();ctx.fill();
+  // 地面
+  ctx.fillStyle=night?"#3a3f52":"#cfc6b8";ctx.fillRect(0,158,w,18); // 歩道
+  ctx.fillStyle=night?"#2c3040":"#8e8b84";ctx.fillRect(0,176,w,34); // 道路
+  ctx.strokeStyle=night?"#555a70":"#c6c3bb";ctx.setLineDash([14,12]);
+  ctx.beginPath();ctx.moveTo(-(cam%26),193);ctx.lineTo(w,193);ctx.stroke();ctx.setLineDash([]);
+  // 提灯（お祭り）
+  if(festivalToday()){
+    ctx.strokeStyle="rgba(120,90,60,.5)";ctx.beginPath();ctx.moveTo(0,26);
+    for(let x=0;x<=w;x+=30)ctx.lineTo(x,26+Math.sin((x+cam)*0.05)*5);
+    ctx.stroke();ctx.font="13px serif";
+    for(let x=10;x<w;x+=48)ctx.fillText("🏮",x,40);
+  }
+  // 建物
+  BLD.forEach(b=>{
+    const bx=b.x-cam;if(bx>w+150||bx+(b.w||0)<-150)return;
+    if(b.park){ // 公園
+      ctx.font="30px serif";ctx.fillText("🌳",bx,158);ctx.fillText("🌳",bx+(b.w-34),156);
+      ctx.font="15px serif";ctx.fillText("🪑",bx+b.w/2-8,157);
+      return;
+    }
+    if(b.rival&&S.stage<3){ // ライバルは第3段階から
+      ctx.fillStyle=night?"#3f4254":"#c9c4ba";ctx.fillRect(bx,158-b.h,b.w,b.h);
+      ctx.fillStyle=night?"#585c72":"#a8a49b";ctx.fillRect(bx-4,158-b.h-10,b.w+8,12);
+      ctx.font="10px sans-serif";ctx.fillStyle=night?"#9aa":"#7b776f";
+      ctx.fillText("テナントぼしゅう中",bx+8,158-b.h/2);
+      return;
+    }
+    ctx.fillStyle=night?shade(b.c,-45):b.c;ctx.fillRect(bx,158-b.h,b.w,b.h);
+    ctx.fillStyle=night?shade(b.c,-70):shade(b.c,-25);ctx.fillRect(bx-4,158-b.h-10,b.w+8,12); // 屋根
+    // 窓
+    for(let wx=bx+10;wx<bx+b.w-14;wx+=22){
+      ctx.fillStyle=night?(Math.floor(wx+b.x)%3?"#ffd77a":"#4a4e63"):"#ffffff88";
+      ctx.fillRect(wx,158-b.h+16,12,10);
+    }
+    ctx.font="17px serif";ctx.fillText(b.sign,bx+b.w/2-9,158-b.h+12);
+    if(b.label){ctx.font="9px sans-serif";ctx.fillStyle=night?"#cfd2e0":"#6b6b66";ctx.fillText(b.label,bx+b.w/2-b.label.length*4.5,157-2);}
+    if(b.rival&&S.rivalDays>0){ // ライバルのキャンペーン
+      ctx.font="14px serif";ctx.fillText("📢",bx-14,150);
+      ctx.fillText("🧍🧍🧍",bx+b.w/2-21,156);
+      ctx.font="9px sans-serif";ctx.fillStyle="#c0392b";ctx.fillText("セール中！",bx+b.w/2-22,158-b.h-14);
+    }
+  });
+  // ===== 自分の店 =====
+  drawStore(ctx,TW_SX-cam,night);
+  // 車
+  ctx.font="20px serif";ctx.fillText(TOWN.car.e,TOWN.car.x-cam,201);
+  // 通行人
+  const t=performance.now()/1000;
+  TOWN.walkers.forEach(wk=>{
+    const wy=157+Math.sin(t*7+wk.bob)*1.6;
+    ctx.font="16px serif";ctx.fillText(wk.e,wk.x-cam-8,wy);
+    if(wk.angry){ctx.font="9px serif";ctx.fillText("💢",wk.x-cam+4,wy-14);}
+    else if(wk.happy){ctx.font="9px serif";ctx.fillText("😊",wk.x-cam+4,wy-14);}
+    else if(wk.state==="to"){ctx.font="9px serif";ctx.fillText("❗",wk.x-cam+4,wy-14);}
+  });
+  // パーティクル
+  TOWN.parts.forEach(pt=>{
+    if(pt.txt){ctx.font="13px serif";ctx.globalAlpha=1-pt.age;ctx.fillText(pt.txt,pt.x-cam,pt.y+pt.age*(pt.vy||0));ctx.globalAlpha=1;}
+    else{ctx.fillStyle=pt.col;ctx.globalAlpha=.8;ctx.beginPath();ctx.arc(pt.x-cam,pt.y,pt.col==="#ffffff"?2:2.4,0,7);ctx.fill();ctx.globalAlpha=1;}
+  });
+  // 花火
+  TOWN.fw.forEach(f=>{
+    const rr=f.age*46;ctx.globalAlpha=1-f.age*0.85;
+    for(let i=0;i<10;i++){const a=i/10*6.283;
+      ctx.fillStyle=f.col;ctx.beginPath();ctx.arc(f.x-cam+Math.cos(a)*rr,f.y+Math.sin(a)*rr,2,0,7);ctx.fill();}
+    ctx.globalAlpha=1;
+  });
+  // お金フロート
+  TOWN.floats.forEach(f=>{
+    ctx.globalAlpha=Math.max(0,1-f.age*0.75);
+    ctx.font="bold 12px sans-serif";ctx.fillStyle="#d95d39";
+    ctx.fillText(f.txt,f.x-cam-20,f.y);ctx.globalAlpha=1;
+  });
+  // バズ表示
+  if(S.buzz>0){ctx.font="bold 13px sans-serif";ctx.fillStyle="#d95d39";
+    ctx.fillText("🔥 バズ中！ 🔥",TW_SX-cam+TW_SW/2-45,52);}
+}
+function drawStore(ctx,sx,night){
+  const tier=intr().tier,sh=84+tier*5,top=158-sh;
+  // 壁
+  ctx.fillStyle=night?shade(WALL[S.interior],-30):WALL[S.interior];
+  ctx.fillRect(sx,top,TW_SW,sh);
+  // 屋根・ひさし
+  ctx.fillStyle="#d95d39";ctx.fillRect(sx-6,top-12,TW_SW+12,14);
+  for(let i=0;i<6;i++){ctx.fillStyle=i%2?"#d95d39":"#f3e9dc";ctx.fillRect(sx-6+i*(TW_SW+12)/6,top+2,(TW_SW+12)/6,10);}
+  // 看板
+  ctx.fillStyle=night?"#2e2a26":"#4a443c";ctx.fillRect(sx+16,top-34,TW_SW-32,24);
+  ctx.font="13px serif";ctx.fillText(intr().e,sx+22,top-16);
+  ctx.font="bold 11px sans-serif";ctx.fillStyle=night?"#ffd77a":"#fff";
+  ctx.fillText(S.storeName.slice(0,9),sx+42,top-16);
+  // 窓（店内の客が見える）
+  ctx.fillStyle=night?"#ffe9b0":"#fff8ea";ctx.fillRect(sx+12,top+22,96,40);
+  ctx.strokeStyle="#00000022";ctx.strokeRect(sx+12,top+22,96,40);
+  ctx.font="15px serif";
+  seated.slice(0,5).forEach((c,i)=>ctx.fillText(SEGS[c.seg].e,sx+17+i*18,top+50));
+  if(seated.length>0){ctx.font="10px serif";ctx.fillText("♨️",sx+96,top+34);} // 湯気
+  // ドア＋のれん
+  ctx.fillStyle=night?"#5a4634":"#7a5f45";ctx.fillRect(sx+120,top+26,40,sh-26);
+  ctx.fillStyle="#2f6f5e";ctx.fillRect(sx+118,top+26,44,12);
+  ctx.font="8px sans-serif";ctx.fillStyle="#fff";ctx.fillText("営業中",sx+126,top+35);
+  // 行列
+  ctx.font="14px serif";
+  for(let i=0;i<queue;i++)ctx.fillText("🧍",sx+TW_SW+8+i*15,156);
+  if(queue>0){ctx.font="9px sans-serif";ctx.fillStyle="#d95d39";ctx.fillText("行列"+queue+"人！",sx+TW_SW+8,138);}
+  // 店内満席度
+  ctx.font="9px sans-serif";ctx.fillStyle=night?"#e8e4da":"#6b6b66";
+  ctx.fillText("店内 "+seated.length+"/"+S.seats,sx+14,top+74);
+}
+function shade(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  let r=(n>>16)+amt,g2=(n>>8&255)+amt,b=(n&255)+amt;
+  r=Math.max(0,Math.min(255,r));g2=Math.max(0,Math.min(255,g2));b=Math.max(0,Math.min(255,b));
+  return "rgb("+r+","+g2+","+b+")";
+}
+function renderBustle(){
+  const now=Date.now();
+  while(earnLog.length&&now-earnLog[0][0]>60000)earnLog.shift();
+  const pace=earnLog.reduce((a,e)=>a+e[1],0);
+  const lv=bustleLv();
+  const names=["ガラガラ…","ぽつぽつ","そこそこ","にぎわい！","大繁盛！！"];
+  $("bustle").innerHTML=
+   `<span>繁盛度 <span class="lv">${"●".repeat(lv+1)}${"○".repeat(4-lv)} ${names[lv]}</span></span>`+
+   `<span>売上ペース <b>${fmt(pace)}/分</b></span>`+
+   `<span>店内 <b>${seated.length}/${S.seats}</b>・行列 <b>${queue}</b></span>`;
+}
+// パン操作
+(function(){
+  const cv=$("town");
+  cv.addEventListener("pointerdown",e=>{TOWN.drag={x:e.clientX,cam:TOWN.cam??0};TOWN.dragMoved=false;cv.classList.add("dragging");cv.setPointerCapture(e.pointerId);});
+  cv.addEventListener("pointermove",e=>{
+    if(!TOWN.drag)return;
+    const dx=e.clientX-TOWN.drag.x;
+    if(Math.abs(dx)>3)TOWN.dragMoved=true;
+    TOWN.cam=TOWN.drag.cam-dx;
+  });
+  const up=e=>{TOWN.drag=null;cv.classList.remove("dragging");};
+  cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",up);
+  cv.addEventListener("dblclick",()=>{TOWN.cam=TW_SX+TW_SW/2-cv.clientWidth/2;}); // ダブルタップで店に戻る
+})();
+let bustleT=0;
+function scnLoop(ts){
+  const dt=Math.min(0.05,(ts-TOWN.last)/1000||0.016);TOWN.last=ts;
+  if(!document.hidden&&curPg==="store"){
+    scnUpdate(dt);scnDraw();
+    if((bustleT+=dt)>1){bustleT=0;renderBustle();}
+  }
+  requestAnimationFrame(scnLoop);
+}
+requestAnimationFrame(scnLoop);
+// ---------------- INIT ----------------
+load();
+const isNew=S.totalCustomers===0&&S.day===1&&S.t===0;
+renderAll();renderMkt();
+if(isNew){
+  log("ガランとした屋台。まずは最初の一人を呼ぼう");
+  modal(`<h2>🏮 名店ものがたり</h2>
+  <p style="font-size:13px;line-height:1.9;color:#555">
+  ガランとした屋台に、<b>最初の一人</b>を呼ぶところから。<br><br>
+  📣 <b>仕込み</b>で客を呼び、🎲 <b>運</b>で結果が決まる。<br>
+  見ていない間もお店は営業。戻ったら売上を<b>開封</b>！<br><br>
+  メニュー・内装・スタッフを組み合わせて、自分だけの名店を育てよう。</p>
+  <button class="btn acc" style="margin-top:16px" onclick="closeModal()">開店する！</button>`);
+}else{
+  offlineSettle();
+}
+setInterval(tick,1000);
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){save();}
+  else{offlineSettle();}
+});
+window.addEventListener("beforeunload",save);
+
+</script>
+</body>
+</html>
