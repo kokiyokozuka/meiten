@@ -24,12 +24,16 @@ canvas{display:block}
 #stamBar>div{background:var(--accent2)}
 #hungBar>div{background:var(--gold)}
 #repRow b{color:var(--accent2)}
+#buzzRow{display:none;background:rgba(217,93,57,.95);color:#fff}
+#buzzRow.on{display:block}
 /* ---- bottom controls ---- */
 #stickZone{position:fixed;left:0;bottom:0;width:45%;height:45%;z-index:11;touch-action:none}
 #stick{position:absolute;width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.5);display:none}
 #knob{position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.85);left:26px;top:26px}
 #actBtn{position:fixed;right:16px;bottom:86px;z-index:12;background:var(--accent);color:#fff;border:none;border-radius:30px;padding:14px 22px;font-size:15px;font-weight:800;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.3);display:none;max-width:70vw}
 #actBtn:active{transform:scale(.95)}
+#helpBtn{position:fixed;right:16px;bottom:150px;z-index:12;background:var(--accent2);color:#fff;border:none;border-radius:30px;padding:12px 20px;font-size:14px;font-weight:800;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.3);display:none;max-width:70vw}
+#helpBtn:active{transform:scale(.95)}
 #menuBtn{position:fixed;right:16px;bottom:24px;z-index:12;background:rgba(255,255,255,.92);color:var(--ink);border:none;border-radius:30px;padding:12px 20px;font-size:13px;font-weight:800;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.25)}
 #shopBtn{position:fixed;right:118px;bottom:24px;z-index:12;background:rgba(255,255,255,.92);color:var(--ink);border:none;border-radius:30px;padding:12px 18px;font-size:13px;font-weight:800;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.25)}
 #shopBtn.open{background:var(--accent2);color:#fff}
@@ -72,6 +76,25 @@ input[type=range]{width:100%}
 #mmap{position:fixed;right:12px;bottom:150px;width:140px;height:140px;z-index:9;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.3)}
 #phoneBtn{position:fixed;left:12px;bottom:24px;z-index:12;background:var(--ink);color:#fff;border:none;border-radius:30px;padding:12px 18px;font-size:13px;font-weight:800;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #phoneBtn:active{transform:scale(.95)}
+#mapBtn{position:fixed;left:12px;bottom:70px;z-index:12;background:rgba(255,255,255,.92);color:var(--ink);border:none;border-radius:30px;padding:11px 16px;font-size:13px;font-weight:800;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+#mapBtn:active{transform:scale(.95)}
+/* national map */
+.jpmap{position:relative;width:100%;height:340px;background:linear-gradient(#dCEBF5,#eaf3ec);border-radius:14px;overflow:hidden;border:1.5px solid var(--line)}
+.jpmap .sea{position:absolute;inset:0;background:radial-gradient(circle at 60% 40%,#cfe6f2,#bcd8e8)}
+.pdot{position:absolute;transform:translate(-50%,-50%);width:15px;height:15px;border-radius:50%;background:#8aa0a8;border:1.5px solid #fff;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.pdot.here{background:var(--accent);width:19px;height:19px;z-index:5}
+.pdot.store{background:var(--accent2);z-index:4}
+.pdot.store2{background:var(--gold);z-index:4}
+.pdot:active{transform:translate(-50%,-50%) scale(1.3)}
+.plabel{position:absolute;transform:translate(-50%,-50%);font-size:9px;font-weight:700;color:#33413f;pointer-events:none;text-shadow:0 1px 2px rgba(255,255,255,.9);white-space:nowrap}
+.reglegend{font-size:10px;color:#888;margin:6px 0}
+/* staff row */
+.srow{display:flex;align-items:center;gap:6px;font-size:12px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.srow .nm{flex:1;font-weight:700}
+.srow .mood{font-size:14px}
+.mini{font-size:10px;padding:4px 8px;border-radius:9px;border:1.5px solid var(--line);background:#f6f4f0;font-weight:700;font-family:inherit;cursor:pointer}
+.mini.warn{border-color:var(--danger);color:var(--danger)}
+.mini.acc{background:var(--accent2);color:#fff;border-color:var(--accent2)}
 /* game over */
 #over{position:fixed;inset:0;background:rgba(10,8,6,.92);z-index:60;display:none;align-items:center;justify-content:center;text-align:center;color:#fff;padding:20px}
 #over.on{display:flex}
@@ -88,6 +111,7 @@ kbd{background:#eee;border-radius:4px;padding:1px 6px;font-size:11px;color:#333}
   <div class="hudCard" id="hudTime"><small id="hudDay">1日目</small>06:00</div>
   <div id="hudRight">
     <div class="meter" id="repRow">評判 <b id="hudRep">30</b>／100・ブランド <b id="hudBrand">0</b></div>
+    <div class="meter" id="buzzRow">🔥 バズ中！ <b id="hudBuzz"></b></div>
     <div class="meter">体力<div class="bar" id="stamBar"><div style="width:100%"></div></div></div>
     <div class="meter">空腹<div class="bar" id="hungBar"><div style="width:80%"></div></div></div>
   </div>
@@ -96,9 +120,11 @@ kbd{background:#eee;border-radius:4px;padding:1px 6px;font-size:11px;color:#333}
 <div id="log"></div>
 <div id="stickZone"><div id="stick"><div id="knob"></div></div></div>
 <button id="actBtn">🗣 話す</button>
+<button id="helpBtn">🤝 手伝う</button>
 <button id="shopBtn">🔒 閉店中</button>
 <button id="menuBtn">📋 メニュー</button>
 <button id="phoneBtn">📱 スマホ</button>
+<button id="mapBtn">🗾 マップ</button>
 <canvas id="mmap" width="140" height="140"></canvas>
 
 <div id="dlg">
@@ -121,7 +147,7 @@ kbd{background:#eee;border-radius:4px;padding:1px 6px;font-size:11px;color:#333}
 <script>
 "use strict";
 // ================================================================
-// 名店ものがたり3D — 主人公目線・破産ありガチ経営・人生シム
+// 名店ものがたり3D — 全国47都道府県・空間厨房・人生経営シム（改良版）
 // ================================================================
 // ---------------- STATE ----------------
 const DEF=()=>({
@@ -129,26 +155,40 @@ const DEF=()=>({
  rep:30, brand:0,
  stam:100, maxStam:100, hunger:80,
  skills:{nego:1,talk:1,cook:1}, xp:{nego:0,talk:0,cook:0},
- stock:[], // {n, day} 鮮度2日
+ stock:[], // {t,n,q,day} 鮮度2日
  price:600, quality:1, open:false,
- staff:[], // {name,skill,wage,morale}
+ staff:[], // {name,skill,wage,morale,quirk}
  rels:{oyaji:0,bank:0,mina:0,baa:0,aoki:0},
  minaKanban:false,
  loans:0, negDays:0, mktRate:1.0,
- city:null, concept:null, interiorLv:1, qsum:0,
+ city:null, concept:null, interiorLv:1, qsum:0, seats:4,
  hq:false, areaMgr:null, cookQ:0, inside:false, lastRoy:0,
- menu:null, habit:0, formation:{prep:null,main:null,serve:null},
+ menu:null, habit:0,
+ formation:{prep:[],main:[],serve:[]}, // 各持ち場 最大3人（名前の配列）
  formKeyY:"", formKeyT:"", nextMkt:0,
  ads:{flyer:0,sns:0,tv:0},
- st2:{owned:false,mgr:null},
+ st2:{owned:false,pref:null,concept:null,mgr:null,staff:[],rep:20,interiorLv:1,
+      dir:{price:"std",focus:"cust",ad:0},lastPl:0,boost:0},
+ activeStore:1, // 1=本店 2=2号店（旅行中）
  fr:0, // フランチャイズ加盟店数
  buffTalk:0, rivalSale:0,
+ buzzDays:0, buzzMult:1, buzzKind:"", buzzLostWarn:false,
+ useToday:{}, useHist:{}, // 仕入れ支援：材料消費の実績
  sales:0, custs:0, lost:0, // 当日集計
  sleptDay:0, gameOver:false, restarts:0,
 });
 let S=DEF();
 function save(){try{localStorage.setItem("meiten3d",JSON.stringify(S));}catch(e){}}
-function load(){try{const d=localStorage.getItem("meiten3d");if(d)S=Object.assign(DEF(),JSON.parse(d));}catch(e){}}
+function load(){try{const d=localStorage.getItem("meiten3d");if(d)S=deepMerge(DEF(),JSON.parse(d));}catch(e){}}
+function deepMerge(def,saved){ // 旧セーブでも欠けたキーを補完
+  const o=Object.assign({},def);
+  for(const k in saved){
+    if(saved[k]&&typeof saved[k]==="object"&&!Array.isArray(saved[k])&&def[k]&&typeof def[k]==="object"&&!Array.isArray(def[k]))
+      o[k]=deepMerge(def[k],saved[k]);
+    else o[k]=saved[k];
+  }
+  return o;
+}
 const $=id=>document.getElementById(id);
 const fmt=n=>"¥"+Math.round(n).toLocaleString();
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -156,6 +196,7 @@ const RI=(a,b)=>Math.floor(R(a,b+1));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function stockTotal(t){return S.stock.reduce((a,s)=>a+((t&&s.t!==t)?0:s.n),0);}
+function trackUse(t,n){S.useToday[t]=(S.useToday[t]||0)+n;}
 function consumeType(t,n){
   S.stock.sort((a,b)=>a.day-b.day);
   let left=n,qacc=0;
@@ -165,21 +206,89 @@ function consumeType(t,n){
     if(left<=0)break;
   }
   S.stock=S.stock.filter(s=>s.n>0);
+  trackUse(t,n-left);
+  return n>0?qacc/n:1;
+}
+function consumeStock(n){ // 種類問わずn個（研究・自炊用）
+  S.stock.sort((a,b)=>a.day-b.day);
+  let left=n,qacc=0;
+  for(const s of S.stock){const t=Math.min(s.n,left);s.n-=t;left-=t;qacc+=t*(s.q===undefined?1:s.q);trackUse(s.t,t);if(left<=0)break;}
+  S.stock=S.stock.filter(s=>s.n>0);
   return n>0?qacc/n:1;
 }
 function skillLv(k){return 1+Math.floor(S.xp[k]/5);}
 function gainXp(k,n){const b=skillLv(k);S.xp[k]+=n;if(skillLv(k)>b)toast("📈 "+({nego:"交渉",talk:"話術",cook:"料理"})[k]+"Lv"+skillLv(k)+"にアップ！");}
 function hourNow(){return S.tmin/60;}
 function clock(){const h=Math.floor(S.tmin/60)%24,m=Math.floor(S.tmin%60);return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");}
-// ---------------- 全国・コンセプト・客層 ----------------
-const CITIES={
- tokyo:  {n:"東京・下町",   short:"東京",e:"🗼",rent:15000,traffic:1.5,tourist:1.1,nightF:1.0,desc:"人通り最強・家賃も最強"},
- osaka:  {n:"大阪・商店街", short:"大阪",e:"🐙",rent:9000, traffic:1.3,tourist:1.0,nightF:1.1,desc:"商人の町。活気と競争"},
- kyoto:  {n:"京都・観光地", short:"京都",e:"⛩️",rent:11000,traffic:1.0,tourist:1.8,nightF:0.9,desc:"観光客が高単価を落とす"},
- fukuoka:{n:"福岡・屋台通り",short:"福岡",e:"🍜",rent:6000, traffic:1.1,tourist:1.2,nightF:1.4,desc:"夜がアツい町"},
- sapporo:{n:"札幌・駅前",   short:"札幌",e:"⛄",rent:8000, traffic:1.1,tourist:1.3,nightF:1.0,mkt:0.9,desc:"食材が安い（仕入れ-10%）"},
- okinawa:{n:"沖縄・ビーチ通り",short:"沖縄",e:"🌺",rent:4000,traffic:0.75,tourist:1.9,nightF:1.1,desc:"家賃激安・観光頼み"},
+// ---------------- 全国47都道府県・地方 ----------------
+const REGIONS={
+ hokkaido:{n:"北海道",e:"⛄",g:0xe4e9ee,leaf:0xcfdde6,lm:"snow"},
+ tohoku:  {n:"東北",  e:"🌾",g:0x9db089,leaf:0x4e7f3e,lm:"mountain"},
+ kanto:   {n:"関東",  e:"🗼",g:0x9aa0a0,leaf:0x4e8f4e,lm:"tower"},
+ chubu:   {n:"中部",  e:"🗻",g:0xa0b088,leaf:0x4e8f3e,lm:"mountain"},
+ kansai:  {n:"近畿",  e:"⛩️",g:0xa8b088,leaf:0x5e9f4e,lm:"torii"},
+ chugoku: {n:"中国",  e:"🌊",g:0x9db882,leaf:0x4e8f4e,lm:"torii"},
+ shikoku: {n:"四国",  e:"🍊",g:0x9dbf7e,leaf:0x4e9f5e,lm:"tree"},
+ kyushu:  {n:"九州・沖縄",e:"🍜",g:0x9dbf7e,leaf:0x3ea06e,lm:"yatai"},
 };
+// r=地方 rent=店家賃/日 traffic=人通り tourist=観光 nightF=夜補正 mkt=仕入相場 lm=専用ランドマーク x,y=地図%
+const PREF={
+ hokkaido:{n:"北海道・札幌",short:"北海道",e:"⛄",r:"hokkaido",rent:8000,traffic:1.1,tourist:1.3,nightF:1.0,mkt:0.9,lm:"snow",x:80,y:9,desc:"食材が安い（仕入-10%）・観光も強い"},
+ aomori:{n:"青森",short:"青森",e:"🍎",r:"tohoku",rent:3500,traffic:0.8,tourist:1.1,nightF:0.9,x:70,y:20},
+ iwate:{n:"岩手",short:"岩手",r:"tohoku",rent:3200,traffic:0.75,tourist:1.0,nightF:0.85,x:75,y:26},
+ miyagi:{n:"宮城・仙台",short:"宮城",e:"🌾",r:"tohoku",rent:7000,traffic:1.15,tourist:1.1,nightF:1.05,x:73,y:33,desc:"東北最大の都市・杜の都"},
+ akita:{n:"秋田",short:"秋田",r:"tohoku",rent:3200,traffic:0.72,tourist:1.0,nightF:0.85,x:66,y:26},
+ yamagata:{n:"山形",short:"山形",r:"tohoku",rent:3300,traffic:0.75,tourist:1.0,nightF:0.85,x:66,y:34},
+ fukushima:{n:"福島",short:"福島",r:"tohoku",rent:4000,traffic:0.9,tourist:1.0,nightF:0.9,x:71,y:40},
+ ibaraki:{n:"茨城",short:"茨城",r:"kanto",rent:5000,traffic:1.0,tourist:0.9,nightF:0.95,x:76,y:46},
+ tochigi:{n:"栃木",short:"栃木",r:"kanto",rent:4500,traffic:0.95,tourist:1.1,nightF:0.9,x:71,y:44},
+ gunma:{n:"群馬",short:"群馬",r:"kanto",rent:4200,traffic:0.9,tourist:1.0,nightF:0.9,x:66,y:45},
+ saitama:{n:"埼玉",short:"埼玉",r:"kanto",rent:9000,traffic:1.25,tourist:0.9,nightF:1.0,x:70,y:49},
+ chiba:{n:"千葉",short:"千葉",r:"kanto",rent:8000,traffic:1.2,tourist:1.2,nightF:1.0,x:77,y:52},
+ tokyo:{n:"東京・下町",short:"東京",e:"🗼",r:"kanto",rent:15000,traffic:1.5,tourist:1.1,nightF:1.0,lm:"tower",x:73,y:53,desc:"人通り最強・家賃も最強"},
+ kanagawa:{n:"神奈川・横浜",short:"神奈川",e:"⚓",r:"kanto",rent:11000,traffic:1.35,tourist:1.15,nightF:1.05,x:71,y:57,desc:"港町・高単価が狙える"},
+ niigata:{n:"新潟",short:"新潟",e:"🍚",r:"chubu",rent:4500,traffic:0.95,tourist:1.0,nightF:0.9,mkt:0.95,x:63,y:40},
+ toyama:{n:"富山",short:"富山",r:"chubu",rent:4000,traffic:0.85,tourist:1.0,nightF:0.9,x:58,y:44},
+ ishikawa:{n:"石川・金沢",short:"石川",e:"🍶",r:"chubu",rent:5000,traffic:0.95,tourist:1.4,nightF:0.95,x:55,y:42,desc:"観光地・海の幸が自慢"},
+ fukui:{n:"福井",short:"福井",r:"chubu",rent:3800,traffic:0.8,tourist:1.05,nightF:0.9,x:53,y:47},
+ yamanashi:{n:"山梨",short:"山梨",r:"chubu",rent:4200,traffic:0.85,tourist:1.2,nightF:0.9,x:66,y:54},
+ nagano:{n:"長野",short:"長野",e:"🗻",r:"chubu",rent:4300,traffic:0.85,tourist:1.3,nightF:0.85,lm:"mountain",x:62,y:50},
+ gifu:{n:"岐阜",short:"岐阜",r:"chubu",rent:4200,traffic:0.9,tourist:1.15,nightF:0.9,x:57,y:53},
+ shizuoka:{n:"静岡",short:"静岡",e:"🗻",r:"chubu",rent:6000,traffic:1.05,tourist:1.2,nightF:0.95,lm:"mountain",x:64,y:58,desc:"富士山とお茶の国"},
+ aichi:{n:"愛知・名古屋",short:"愛知",e:"🏯",r:"chubu",rent:10000,traffic:1.3,tourist:1.0,nightF:1.05,lm:"castle",x:59,y:57,desc:"中部の大都市・味噌文化"},
+ mie:{n:"三重",short:"三重",r:"kansai",rent:4500,traffic:0.9,tourist:1.15,nightF:0.9,x:56,y:61},
+ shiga:{n:"滋賀",short:"滋賀",r:"kansai",rent:4300,traffic:0.9,tourist:1.1,nightF:0.9,x:54,y:56},
+ kyoto:{n:"京都・観光地",short:"京都",e:"⛩️",r:"kansai",rent:11000,traffic:1.05,tourist:1.8,nightF:0.9,lm:"torii",x:51,y:54,desc:"観光客が高単価を落とす"},
+ osaka:{n:"大阪・商店街",short:"大阪",e:"🐙",r:"kansai",rent:9000,traffic:1.35,tourist:1.15,nightF:1.15,lm:"castle",x:49,y:58,desc:"商人の町。活気と競争"},
+ hyogo:{n:"兵庫・神戸",short:"兵庫",e:"⚓",r:"kansai",rent:8000,traffic:1.15,tourist:1.2,nightF:1.0,x:46,y:57,desc:"おしゃれな港町・高単価"},
+ nara:{n:"奈良",short:"奈良",e:"🦌",r:"kansai",rent:4800,traffic:0.9,tourist:1.5,nightF:0.85,x:52,y:61},
+ wakayama:{n:"和歌山",short:"和歌山",e:"🍊",r:"kansai",rent:3800,traffic:0.8,tourist:1.15,nightF:0.85,x:50,y:64},
+ tottori:{n:"鳥取",short:"鳥取",r:"chugoku",rent:3200,traffic:0.72,tourist:1.05,nightF:0.85,x:44,y:52},
+ shimane:{n:"島根",short:"島根",e:"⛩️",r:"chugoku",rent:3200,traffic:0.7,tourist:1.1,nightF:0.85,x:40,y:52},
+ okayama:{n:"岡山",short:"岡山",r:"chugoku",rent:5000,traffic:0.98,tourist:1.05,nightF:0.95,x:43,y:58},
+ hiroshima:{n:"広島",short:"広島",e:"⛩️",r:"chugoku",rent:6500,traffic:1.1,tourist:1.3,nightF:1.0,lm:"torii",x:37,y:57,desc:"中国地方の中心・お好み文化"},
+ yamaguchi:{n:"山口",short:"山口",r:"chugoku",rent:3800,traffic:0.8,tourist:1.05,nightF:0.9,x:33,y:58},
+ tokushima:{n:"徳島",short:"徳島",r:"shikoku",rent:3500,traffic:0.78,tourist:1.0,nightF:0.9,x:47,y:63},
+ kagawa:{n:"香川",short:"香川",e:"🍜",r:"shikoku",rent:4200,traffic:0.85,tourist:1.05,nightF:0.9,x:44,y:62,desc:"うどん県"},
+ ehime:{n:"愛媛",short:"愛媛",e:"🍊",r:"shikoku",rent:4000,traffic:0.82,tourist:1.05,nightF:0.9,x:38,y:63},
+ kochi:{n:"高知",short:"高知",r:"shikoku",rent:3400,traffic:0.75,tourist:1.1,nightF:0.9,x:41,y:67},
+ fukuoka:{n:"福岡・屋台通り",short:"福岡",e:"🍜",r:"kyushu",rent:6000,traffic:1.15,tourist:1.2,nightF:1.4,lm:"yatai",x:30,y:60,desc:"夜がアツい町"},
+ saga:{n:"佐賀",short:"佐賀",r:"kyushu",rent:3400,traffic:0.78,tourist:1.0,nightF:0.95,x:27,y:61},
+ nagasaki:{n:"長崎",short:"長崎",e:"⚓",r:"kyushu",rent:4500,traffic:0.9,tourist:1.4,nightF:1.0,x:24,y:63,desc:"異国情緒の港町"},
+ kumamoto:{n:"熊本",short:"熊本",e:"🏯",r:"kyushu",rent:4500,traffic:0.9,tourist:1.15,nightF:0.95,lm:"castle",x:28,y:66},
+ oita:{n:"大分・別府",short:"大分",e:"♨️",r:"kyushu",rent:4000,traffic:0.82,tourist:1.2,nightF:0.95,x:32,y:64,desc:"温泉天国"},
+ miyazaki:{n:"宮崎",short:"宮崎",e:"🌴",r:"kyushu",rent:3600,traffic:0.78,tourist:1.15,nightF:0.9,x:31,y:70},
+ kagoshima:{n:"鹿児島",short:"鹿児島",e:"🌋",r:"kyushu",rent:4200,traffic:0.85,tourist:1.2,nightF:0.95,lm:"volcano",x:28,y:72},
+ okinawa:{n:"沖縄・ビーチ通り",short:"沖縄",e:"🌺",r:"kyushu",rent:4000,traffic:0.75,tourist:1.9,nightF:1.1,lm:"sea",x:12,y:83,desc:"家賃激安・観光頼み"},
+};
+const PREFKEYS=Object.keys(PREF);
+PREFKEYS.forEach(k=>{if(!PREF[k].e)PREF[k].e=REGIONS[PREF[k].r].e;});
+function prefDesc(k){const p=PREF[k];if(p.desc)return p.desc;
+  const t=[];if(p.rent>=9000)t.push("家賃高");else if(p.rent<=3800)t.push("家賃安");
+  if(p.traffic>=1.15)t.push("人通り多");else if(p.traffic<=0.8)t.push("静かな町");
+  if(p.tourist>=1.3)t.push("観光地");if(p.nightF>=1.15)t.push("夜が強い");
+  return (REGIONS[p.r].n+"地方")+(t.length?"／"+t.join("・"):"");
+}
 const CONCEPTS={
  shokudo:{n:"大衆食堂",e:"🍚",color:0xe0a84f,day:1.3,night:0.8,seg:{student:1.3,oyaji:1.2,salary:1.1,family:1.1,couple:0.6,tourist:0.8},desc:"昼に強いバランス型。学生とおじさんの味方"},
  izakaya:{n:"居酒屋",  e:"🏮",color:0xb85c38,day:0.5,night:1.7,seg:{oyaji:1.6,salary:1.5,student:0.9,family:0.3,couple:0.9,tourist:1.0},desc:"夜特化。おじさん・サラリーマン天国"},
@@ -195,8 +304,11 @@ const SEG3={
  couple: {n:"カップル",    c:0xe88fae,mult:1.3},
  tourist:{n:"観光客",      c:0xc9a227,mult:1.7},
 };
-function cityC(){return CITIES[S.city]||CITIES.tokyo;}
-function conC(){return CONCEPTS[S.concept]||CONCEPTS.shokudo;}
+function prefC(){return PREF[curPrefKey()]||PREF.tokyo;}
+function cityC(){return prefC();} // 旧名エイリアス
+function curPrefKey(){return S.activeStore===2&&S.st2.pref?S.st2.pref:(S.city||"tokyo");}
+function conC(){return CONCEPTS[curConcept()]||CONCEPTS.shokudo;}
+function curConcept(){return S.activeStore===2&&S.st2.concept?S.st2.concept:S.concept;}
 function segHourW(k){
   const h=hourNow();
   if(k==="student")return h<11?0.6:h<15?1.2:h<18?1.4:h<22?1.0:0.4;
@@ -291,15 +403,18 @@ function closeDlg(){dlgOn=false;$("dlg").style.display="none";}
 function renderHud(){
   $("hudMoney").innerHTML="<small>所持金"+(S.loans>0?"（借金"+fmt(S.loans)+"）":"")+"</small>"+fmt(S.money);
   $("hudMoney").style.color=S.money<0?"var(--danger)":"var(--accent)";
-  $("hudDay").textContent=S.day+"日目・"+(S.city?cityC().short:"—")+(S.concept?" "+conC().e:"")+(S.open?"・営業中":"");
+  $("hudDay").textContent=S.day+"日目・"+(S.city?prefC().short:"—")+(S.activeStore===2?"[2号店]":"")+(curConcept()?" "+conC().e:"")+(S.open&&S.activeStore===1?"・営業中":"");
   $("hudTime").childNodes[1].textContent=clock();
   $("hudRep").textContent=Math.round(S.rep);
   $("hudBrand").textContent=Math.round(S.brand);
   $("stamBar").firstElementChild.style.width=(S.stam/S.maxStam*100)+"%";
   $("hungBar").firstElementChild.style.width=S.hunger+"%";
+  const br=$("buzzRow");
+  if(S.buzzDays>0){br.classList.add("on");$("hudBuzz").textContent="残"+S.buzzDays+"日";}
+  else br.classList.remove("on");
   const sb=$("shopBtn");
-  sb.textContent=S.open?"🏮 営業中":"🔒 閉店中";
-  sb.className=S.open?"open":"";
+  if(S.activeStore===2){sb.textContent="🏢 2号店";sb.className="";}
+  else{sb.textContent=S.open?"🏮 営業中":"🔒 閉店中";sb.className=S.open?"open":"";}
 }
 function useStam(n){
   if(S.stam<n){toast("😵 体力が足りない…家で寝よう");return false;}
@@ -374,43 +489,6 @@ B.butcher=building(-44,-38,8,7,5,0xd9a0a0,"精肉店",0x8a3a3a);
 B.fishshop=building(-20,-38,8,7,5,0xa0c0d9,"鮮魚店",0x3a5a8a);
 B.brew   =building(16,-38,9,7,6,0xd9c9a0,"ビール工房",0x8a6a3a);
 B.riceshop=building(28,-38,8,7,5,0xe0d9c0,"米屋",0x8a7a5a);
-// ===== 店内ルーム（遠隔座標に配置、入店でワープ） =====
-(function(){
-  const M=(geo,c)=>new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:c}));
-  const rf=M(new THREE.PlaneGeometry(16,13),0xb98a5a);rf.rotation.x=-Math.PI/2;rf.position.set(200,0.01,202);scene.add(rf);
-  const wallN=M(new THREE.BoxGeometry(16,2.4,0.5),0xe8dcc8);wallN.position.set(200,1.2,196);scene.add(wallN);
-  const wallW=M(new THREE.BoxGeometry(0.5,2.4,13),0xe8dcc8);wallW.position.set(192,1.2,202);scene.add(wallW);
-  const wallE=M(new THREE.BoxGeometry(0.5,2.4,13),0xe8dcc8);wallE.position.set(208,1.2,202);scene.add(wallE);
-  const counter=M(new THREE.BoxGeometry(7,1.1,1.5),0x8a5a3c);counter.position.set(200,0.55,198.6);scene.add(counter);
-  const stove=M(new THREE.BoxGeometry(1.8,1.25,1.3),0x555a66);stove.position.set(204.5,0.62,198.6);scene.add(stove);
-  const fire=M(new THREE.BoxGeometry(1.2,0.1,0.8),0xd94a2a);fire.position.set(204.5,1.3,198.6);scene.add(fire);
-  solids.push({x:200,z:198.6,w:7,d:1.5},{x:204.5,z:198.6,w:1.8,d:1.3});
-  const lb=makeLabel("厨房",0.9,"rgba(217,93,57,.9)");lb.position.set(204.5,3,198.6);scene.add(lb);
-  for(const tx of [196.5,203.5]){
-    const tb=M(new THREE.CylinderGeometry(1.1,1.1,0.8,12),0x9a6a44);tb.position.set(tx,0.4,204);scene.add(tb);
-  }
-})();
-const sitters=[];
-for(let i=0;i<4;i++){
-  const p=person([0x5a7a9a,0x9a7a5a,0x7a9a6a,0xe08a3e][i]);
-  p.position.set([195.2,197.8,202.2,204.8][i],0,204);
-  p.visible=false;sitters.push(p);
-}
-// 公園
-let themeG=null;const treeLeaves=[];
-function tree(x,z,s){
-  s=s||1;
-  const g=new THREE.Group();
-  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.3*s,0.4*s,1.6*s),new THREE.MeshLambertMaterial({color:0x7a5230}));
-  trunk.position.y=0.8*s;g.add(trunk);
-  const leaf=new THREE.Mesh(new THREE.ConeGeometry(1.6*s,3*s,7),new THREE.MeshLambertMaterial({color:0x4e8f4e}));
-  leaf.position.y=3*s;g.add(leaf);treeLeaves.push(leaf);
-  g.position.set(x,0,z);scene.add(g);
-}
-[[36,14],[40,20],[33,24],[44,15],[38,28],[-46,30],[46,34],[-44,-30],[48,-30],[-48,10]].forEach(p=>tree(p[0],p[1]));
-const bench=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.5,0.8),new THREE.MeshLambertMaterial({color:0x8a6a4a}));
-bench.position.set(38,0.5,22);scene.add(bench);
-const parkLb=makeLabel("公園",1,"rgba(47,111,94,.85)");parkLb.position.set(38,6,20);scene.add(parkLb);
 // 人物
 function person(color,hat){
   const g=new THREE.Group();
@@ -418,60 +496,116 @@ function person(color,hat){
   body.position.y=0.85;g.add(body);
   const head=new THREE.Mesh(new THREE.SphereGeometry(0.42,12,10),new THREE.MeshLambertMaterial({color:0xffdfc4}));
   head.position.y=1.85;g.add(head);
-  // 顔（目）— のっぺらぼう卒業
+  // 顔（目）
   const em=new THREE.MeshBasicMaterial({color:0x2a2a2a});
   const e1=new THREE.Mesh(new THREE.SphereGeometry(0.055,6,6),em);e1.position.set(-0.13,1.92,0.37);g.add(e1);
   const e2=new THREE.Mesh(new THREE.SphereGeometry(0.055,6,6),em);e2.position.set(0.13,1.92,0.37);g.add(e2);
   if(hat){const hm=new THREE.Mesh(new THREE.ConeGeometry(0.45,0.5,10),new THREE.MeshLambertMaterial({color:hat}));hm.position.y=2.25;g.add(hm);}
   scene.add(g);return g;
 }
-// 客層ごとの見た目（ラベルなしで一目でわかる造形）
+// 客層ごとの見た目
 function addSegLook(m,seg){
   const M=(geo,c)=>new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:c}));
-  const hair=(c,style)=>{ // 髪の毛（半球）
+  const hair=(c,style)=>{
     const h=M(new THREE.SphereGeometry(0.44,12,8,0,Math.PI*2,0,Math.PI*0.55),c);
     h.position.y=1.9;m.add(h);
     if(style==="long"){const bk=M(new THREE.BoxGeometry(0.5,0.7,0.2),c);bk.position.set(0,1.55,-0.33);m.add(bk);}
     return h;
   };
-  if(seg==="student"){ // 学ラン＋学帽＋赤リュック・小柄
-    m.children[0].material.color.setHex(0x22304a); // 学ラン紺
+  if(seg==="student"){
+    m.children[0].material.color.setHex(0x22304a);
     m.children[0].scale.set(0.9,0.95,0.9);
-    const btn=M(new THREE.BoxGeometry(0.06,0.7,0.03),0xc9a227);btn.position.set(0,1.05,0.45);m.add(btn); // 金ボタン
+    const btn=M(new THREE.BoxGeometry(0.06,0.7,0.03),0xc9a227);btn.position.set(0,1.05,0.45);m.add(btn);
     const cap=M(new THREE.CylinderGeometry(0.46,0.46,0.14,10),0x22304a);cap.position.y=2.18;m.add(cap);
     const brim=M(new THREE.BoxGeometry(0.42,0.05,0.3),0x141e30);brim.position.set(0,2.13,0.48);m.add(brim);
     const bag=M(new THREE.BoxGeometry(0.55,0.65,0.28),0xb03030);bag.position.set(0,1.15,-0.5);m.add(bag);
-  }else if(seg==="salary"){ // ダークスーツ＋白シャツ＋ネクタイ＋カバン＋七三の黒髪
-    m.children[0].material.color.setHex(0x2e3138); // スーツ
+  }else if(seg==="salary"){
+    m.children[0].material.color.setHex(0x2e3138);
     const shirt=M(new THREE.BoxGeometry(0.3,0.5,0.06),0xf5f5f0);shirt.position.set(0,1.22,0.44);m.add(shirt);
     const tie=M(new THREE.BoxGeometry(0.1,0.44,0.04),0x8a2a2a);tie.position.set(0,1.2,0.48);m.add(tie);
     const bc=M(new THREE.BoxGeometry(0.4,0.3,0.12),0x3a2a1a);bc.position.set(0.62,0.55,0.1);m.add(bc);
     hair(0x1a1a1a);
-  }else if(seg==="oyaji"){ // 恰幅＋ハゲ頭に横髪＋ヒゲ＋赤ら顔
+  }else if(seg==="oyaji"){
     m.children[0].scale.set(1.35,1,1.3);
-    m.children[1].material=new THREE.MeshLambertMaterial({color:0xf0c0a0}); // 赤ら顔
+    m.children[1].material=new THREE.MeshLambertMaterial({color:0xf0c0a0});
     const side1=M(new THREE.BoxGeometry(0.12,0.2,0.3),0x8a8a8a);side1.position.set(-0.4,1.82,0);m.add(side1);
     const side2=side1.clone();side2.position.x=0.4;m.add(side2);
     const hige=M(new THREE.BoxGeometry(0.28,0.08,0.06),0x5a5a5a);hige.position.set(0,1.76,0.39);m.add(hige);
     const brow=M(new THREE.BoxGeometry(0.34,0.06,0.04),0x5a5a5a);brow.position.set(0,2.02,0.37);m.add(brow);
-  }else if(seg==="tourist"){ // アロハ＋麦わら帽＋カメラ＋スーツケース
-    m.children[0].material.color.setHex(0xe86a3a); // アロハ
+  }else if(seg==="tourist"){
+    m.children[0].material.color.setHex(0xe86a3a);
     const flower=M(new THREE.SphereGeometry(0.07,6,6),0xfff0a0);flower.position.set(0.2,1.3,0.42);m.add(flower);
     const flower2=flower.clone();flower2.position.set(-0.18,0.95,0.44);m.add(flower2);
     const hat=M(new THREE.ConeGeometry(0.62,0.3,10),0xd9b96a);hat.position.y=2.14;m.add(hat);
     const cam=M(new THREE.BoxGeometry(0.28,0.2,0.14),0x222222);cam.position.set(0,1.28,0.46);m.add(cam);
     const sc=M(new THREE.BoxGeometry(0.4,0.6,0.2),0x3a6ea5);sc.position.set(-0.68,0.35,0);m.add(sc);
-  }else if(seg==="family"){ // お母さん（エプロン・ロング髪）＋子ども＋買い物袋
+  }else if(seg==="family"){
     m.children[0].material.color.setHex(0xd97a5a);
     const apron=M(new THREE.BoxGeometry(0.5,0.6,0.06),0xfff8ea);apron.position.set(0,0.95,0.44);m.add(apron);
     hair(0x6a4a2a,"long");
     const bag=M(new THREE.BoxGeometry(0.32,0.42,0.22),0xf0e0c0);bag.position.set(-0.62,0.65,0);m.add(bag);
-  }else if(seg==="couple"){ // 彼女（スカート・ロング髪）＋彼氏は別メッシュ
+  }else if(seg==="couple"){
     m.children[0].material.color.setHex(0xe88fae);
     const skirt=M(new THREE.ConeGeometry(0.62,0.5,10),0xd96a8e);skirt.position.y=0.45;m.add(skirt);
     hair(0x7a4a2a,"long");
   }
 }
+// ===== 店内ルーム（遠隔座標に配置、入店でワープ） =====
+const POSN=["prep","main","serve"];
+const PNAME={prep:"🔪 仕込み",main:"🔥 メイン調理",serve:"🍽 接客"};
+// 各持ち場のスタッフ立ち位置（最大3）とプレイヤーの手伝い位置
+const STA={
+ prep:{spots:[[193.4,199.0],[194.8,199.0],[196.2,199.0]],help:[195.0,200.4]},
+ main:{spots:[[198.6,198.2],[200.0,198.2],[201.4,198.2]],help:[200.0,199.6]},
+ serve:{spots:[[204.0,199.2],[205.4,199.2],[206.8,199.2]],help:[205.4,200.6]},
+};
+const SEATPOS=[[193.6,203],[196.4,203],[199.2,203],[202.6,203],[205.6,203],
+ [193.6,205.6],[196.4,205.6],[199.2,205.6],[202.6,205.6],[205.6,205.6],
+ [195.4,207.6],[204.0,207.6]];
+const MAXSEATS=SEATPOS.length;
+(function(){
+  const M=(geo,c)=>new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:c}));
+  const rf=M(new THREE.PlaneGeometry(18,15),0xb98a5a);rf.rotation.x=-Math.PI/2;rf.position.set(200,0.01,203);scene.add(rf);
+  const ceilLightC=0xfff3d0;
+  const wallN=M(new THREE.BoxGeometry(18,2.6,0.5),0xe8dcc8);wallN.position.set(200,1.3,196);scene.add(wallN);
+  const wallW=M(new THREE.BoxGeometry(0.5,2.6,15),0xe8dcc8);wallW.position.set(191.2,1.3,203);scene.add(wallW);
+  const wallE=M(new THREE.BoxGeometry(0.5,2.6,15),0xe8dcc8);wallE.position.set(208.8,1.3,203);scene.add(wallE);
+  // 厨房カウンター（客席との仕切り）
+  const counter=M(new THREE.BoxGeometry(16,1.0,0.6),0x8a5a3c);counter.position.set(200,0.5,200.5);scene.add(counter);
+  // 仕込み台（まな板）
+  for(const s of STA.prep.spots){const tb=M(new THREE.BoxGeometry(1.2,0.9,1.0),0x9a6a44);tb.position.set(s[0],0.45,s[1]-0.5);scene.add(tb);
+    const cb=M(new THREE.BoxGeometry(1.0,0.08,0.7),0xe8d8b8);cb.position.set(s[0],0.94,s[1]-0.5);scene.add(cb);}
+  // コンロ
+  for(const s of STA.main.spots){const st=M(new THREE.BoxGeometry(1.2,0.9,1.0),0x555a66);st.position.set(s[0],0.45,s[1]-0.5);scene.add(st);
+    const fire=M(new THREE.BoxGeometry(0.8,0.08,0.6),0xd94a2a);fire.position.set(s[0],0.95,s[1]-0.5);scene.add(fire);}
+  // 接客カウンター上のパス台
+  for(const s of STA.serve.spots){const p=M(new THREE.BoxGeometry(1.1,0.5,0.8),0xb08a5a);p.position.set(s[0],0.7,s[1]-0.4);scene.add(p);}
+  solids.push({x:200,z:200.5,w:16,d:0.6});
+  // 客席テーブル＆椅子
+  for(const sp of SEATPOS){
+    const tb=M(new THREE.CylinderGeometry(0.7,0.7,0.75,12),0x9a6a44);tb.position.set(sp[0],0.38,sp[1]);scene.add(tb);
+  }
+  const lb=makeLabel("厨房",0.9,"rgba(217,93,57,.9)");lb.position.set(200,3.2,197.6);scene.add(lb);
+  const lb2=makeLabel("客席",0.9,"rgba(47,111,94,.85)");lb2.position.set(200,3.0,205.5);scene.add(lb2);
+})();
+// 店内スタッフのメッシュ（各持ち場3つ×プール）
+const kMesh={prep:[],main:[],serve:[]};
+function kStaffMesh(){
+  const g=person(0xf0f0f0,0xffffff); // 白い調理服＋コック帽
+  g.visible=false;g._nm="";g._lbl=null;
+  return g;
+}
+for(const p of POSN)for(let i=0;i<3;i++)kMesh[p].push(kStaffMesh());
+function setMeshLabel(m,txt){
+  if(m._lbl){m.remove(m._lbl);m._lbl=null;}
+  if(txt){const l=makeLabel(txt,0.6,"rgba(30,26,22,.8)");l.position.y=2.7;m.add(l);m._lbl=l;}
+  m._nm=txt||"";
+}
+// 座席の客メッシュ（プール）
+const seatMesh=[];
+for(let i=0;i<MAXSEATS;i++){const m=person(0x888a99);m.visible=false;seatMesh.push(m);}
+// 出来上がり料理（皿）演出：serve待ちを客席へ運ぶプレイヤーが持つ皿
+const carryDish=(function(){const m=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.28,0.12,12),new THREE.MeshLambertMaterial({color:0xfff0d8}));m.visible=false;scene.add(m);return m;})();
 const player=person(0xd95d39,0x8a3a1a);
 player.position.set(0,0,12);
 const NPC={};
@@ -500,18 +634,61 @@ for(let i=0;i<8;i++){
   p.position.set(R(-40,40),0,R(-40,30));
   peds.push({m:p,tx:R(-40,40),tz:R(-40,30),sp:R(1.2,2.2)});
 }
-// 客（客層つき）
-const custs=[];
+// ================= 接客・厨房パイプライン（席・行列・複数注文・空間厨房） =================
+let custs=[];         // アクティブな客（町を歩く/席にいる）
+let queue=[];         // 行列中の客（custsの部分集合）
+let seats=new Array(MAXSEATS).fill(null); // 席index→客
+let tickets=[];       // 調理中の皿チケット {c,idx,seg,stage,prog}
+let kPost=null;       // プレイヤーが手伝っている持ち場
+let stockWarned={};   // 改善1: 通知の多重防止（日次リセット）
+const ENTRY=[0,13.5]; // 入口
+// --- フォーメーション（各持ち場 最大3人）---
+function staffListAt(p){return (S.formation[p]||[]).map(n=>S.staff.find(s=>s.name===n)).filter(Boolean);}
+function formKey(){return POSN.map(p=>(S.formation[p]||[]).slice().sort().join(",")).join("|");}
+function assignedNames(){const set=new Set();POSN.forEach(p=>(S.formation[p]||[]).forEach(n=>set.add(n)));return set;}
+function wSpeed(st,p){
+  if(!st){let v=0.75+skillLv("cook")*0.12;if(p==="serve")v+=0.2;return v;} // プレイヤー
+  let v=0.5+st.skill*0.18;
+  if(st.quirk==="早起き"&&hourNow()<15)v*=1.25;
+  if(st.quirk==="接客の天才"&&p==="serve")v*=1.3;
+  if(st.quirk==="研究熱心"&&p==="main")v*=1.12;
+  if(st.quirk==="無口だが丁寧")v*=1.08;
+  if(st.quirk==="ムードメーカー")v*=1.05;
+  if(st.morale<40)v*=0.78;else if(st.morale>82)v*=1.08;
+  v*=(1+S.habit*0.02);
+  if(st.instr==="hurry")v*=1.3;else if(st.instr==="care")v*=0.85;
+  return v;
+}
+function workerSpeeds(p){
+  const arr=staffListAt(p).map(st=>wSpeed(st,p));
+  if(kPost===p&&S.inside&&S.activeStore===1)arr.push(wSpeed(null,p));
+  return arr;
+}
+function workerCount(p){return staffListAt(p).length+((kPost===p&&S.inside&&S.activeStore===1)?1:0);}
+// --- 席・行列 ---
+function freeSeat(){for(let i=0;i<S.seats;i++)if(!seats[i])return i;return -1;}
+function occupiedSeats(){let n=0;for(let i=0;i<S.seats;i++)if(seats[i])n++;return n;}
+function releaseSeat(c){if(c.seat!=null){seats[c.seat]=null;seatMesh[c.seat].visible=false;c.seat=null;}}
+function queueCap(){return S.seats+6;}
+function orderCount(seg){
+  const base={student:[1,2],salary:[1,2],oyaji:[1,3],family:[2,4],couple:[2,3],tourist:[1,3]}[seg]||[1,2];
+  let n=RI(base[0],base[1]);
+  const cc=curConcept();
+  if(cc==="izakaya"||cc==="bar")n+=RI(0,1);
+  return clamp(n,1,4);
+}
+// --- 客の生成 ---
 function spawnCust(){
+  if(!S.city)return;
   const seg=pickSeg();
   const m=person(SEG3[seg].c);
-  if(seg==="family"){ // 子ども連れ
+  if(seg==="family"){
     const kb=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.3,0.7,8),new THREE.MeshLambertMaterial({color:SEG3[seg].c}));
     kb.position.set(0.85,0.35,0);m.add(kb);
     const kh=new THREE.Mesh(new THREE.SphereGeometry(0.26,10,8),new THREE.MeshLambertMaterial({color:0xffdfc4}));
     kh.position.set(0.85,0.95,0);m.add(kh);
   }
-  if(seg==="couple"){ // 二人連れ
+  if(seg==="couple"){
     const pb=new THREE.Mesh(new THREE.CylinderGeometry(0.38,0.45,1.2,8),new THREE.MeshLambertMaterial({color:0x9a8ab8}));
     pb.position.set(0.95,0.8,0);m.add(pb);
     const ph=new THREE.Mesh(new THREE.SphereGeometry(0.38,10,8),new THREE.MeshLambertMaterial({color:0xffdfc4}));
@@ -520,12 +697,187 @@ function spawnCust(){
   addSegLook(m,seg);
   const sx=pick([[0,-40],[52,0],[-52,0]]);
   m.position.set(sx[0],0,sx[1]);
-  custs.push({m,seg,phase:"walk",wp:[[sx[0]*0.3,sx[1]===-40?-4:0],[0,4],[0,13.5]],t:0});
+  custs.push({m,seg,phase:"walk",wp:[[sx[0]*0.3,sx[1]===-40?-4:0],[0,4],ENTRY.slice()],t:0,seat:null});
+}
+// 入口に着いた客の振り分け
+function onArrive(c){
+  if(!S.open){c.m.visible=true;c.phase="leave";c.angry=false;c.tx=pick([-52,52]);return;}
+  const idx=freeSeat();
+  if(idx>=0){seatCustomer(c,idx);return;}
+  if(queue.length<queueCap()){enqueue(c);return;}
+  // 満席＋行列も限界 → あきらめて帰る
+  c.m.visible=true;c.phase="leave";c.angry=true;c.tx=pick([-52,52]);
+  S.lost++;S.rep=clamp(S.rep-0.15,0,100);
+  notifyStock("😢 満席で入れず帰った客がいる…（席を増やそう）","full",true);
+}
+function enqueue(c){c.phase="queue";c.qslot=queue.length;c.pat=R(22,40);queue.push(c);c.m.visible=true;}
+function reflowQueue(){queue.forEach((c,j)=>c.qslot=j);}
+function pullFromQueue(){
+  while(S.open){const idx=freeSeat();if(idx<0)break;if(!queue.length)break;
+    const c=queue.shift();reflowQueue();seatCustomer(c,idx);
+  }
+}
+function seatCustomer(c,idx){
+  seats[idx]=c;c.seat=idx;c.phase="order";c.t=R(0.6,1.6);
+  c.m.visible=false; // 店内へ（座席メッシュで表現）
+  const sm=seatMesh[idx];sm.visible=true;sm.children[0].material.color.setHex(SEG3[c.seg].c);
+  sm.position.set(SEATPOS[idx][0],0,SEATPOS[idx][1]);
+}
+function noStockLeave(c){
+  releaseSeat(c);
+  c.m.visible=true;c.m.position.set(R(-2,2),0,13);c.phase="leave";c.angry=true;c.tx=pick([-52,52]);
+  S.lost++;S.rep=clamp(S.rep-0.3,0,100);
+  log("😠 作れる料理がなく客が帰った…（材料を確認）");
+  notifyStock("⚠️ 材料が足りず注文を捌けない！仕入れを！","nostock",true);
+  pullFromQueue();
+}
+function makeOrder(c){
+  ensureMenu();
+  const avail=()=>S.menu.map((d,i)=>({d,i})).filter(x=>x.d.rec.every(t=>stockTotal(t)>=1));
+  if(!avail().length){noStockLeave(c);return;}
+  const n=orderCount(c.seg);
+  c.order=[];c.served=0;c.qtot=0;
+  for(let k=0;k<n;k++){
+    const cands=avail();if(!cands.length)break;
+    const {d,i}=pick(cands);
+    let dq=0;d.rec.forEach(t=>{dq+=consumeType(t,1);});
+    c.qtot+=dq/d.rec.length;
+    const tk={c,idx:i,seg:c.seg,stage:"prep",prog:0};
+    tickets.push(tk);c.order.push(tk);
+  }
+  if(!c.order.length){noStockLeave(c);return;}
+  c.phase="wait";c.wait=0;
+  checkStockAfter();
+}
+// --- パイプライン処理 ---
+const STAGE_LEN={prep:2.4,main:3.6,serve:2.6};
+function advanceTicket(tk){
+  if(tk.stage==="prep")tk.stage="main";
+  else if(tk.stage==="main"){tk.stage="serve";
+    let qc=0;staffListAt("main").forEach(st=>{if(st.quirk==="研究熱心")qc+=0.12;if(st.instr==="care")qc+=0.08;});
+    if(kPost==="main")qc+=0.04;
+    if(qc>0&&Math.random()<qc)S.cookQ=Math.min(15,S.cookQ+1);
+  }else if(tk.stage==="serve")deliverTicket(tk);
+}
+function deliverTicket(tk){
+  const i=tickets.indexOf(tk);if(i>=0)tickets.splice(i,1);
+  const c=tk.c;
+  let pay=Math.round(dishPrice(tk.idx)*SEG3[c.seg].mult*(1+S.habit*0.01));
+  let mark="";
+  if(S.cookQ>0){S.cookQ--;pay=Math.round(pay*1.25);S.rep=clamp(S.rep+0.03,0,100);mark="✨";}
+  S.money+=pay;S.sales+=pay;
+  moneyFx(mark+"+"+fmt(pay),R(-3,3),R(12,16));
+  c.served=(c.served||0)+1;
+  if(c.order&&c.served>=c.order.length){
+    S.custs++;S.qsum+=(c.qtot||1)/c.order.length;
+    c.phase="eat";c.t=R(3,6)+c.order.length*0.8;
+  }
+}
+function processKitchen(dt){
+  for(const p of ["serve","main","prep"]){ // 逆順で1フレーム多重進行を防ぐ
+    const speeds=workerSpeeds(p);if(!speeds.length)continue;
+    const q=tickets.filter(tk=>tk.stage===p);
+    for(let i=0;i<speeds.length&&i<q.length;i++){
+      const tk=q[i];tk.prog+=speeds[i]*dt/STAGE_LEN[p];
+      if(tk.prog>=1){tk.prog=0;advanceTicket(tk);}
+    }
+  }
+}
+// backlog（各持ち場の待ち数）
+function backlog(p){return tickets.reduce((a,tk)=>a+(tk.stage===p?1:0),0);}
+function qTarget(j){return [-4.2,13-j*1.7];}
+function removeCust(c){scene.remove(c.m);custs=custs.filter(x=>x!==c);const qi=queue.indexOf(c);if(qi>=0){queue.splice(qi,1);reflowQueue();}}
+function abandon(c){
+  tickets=tickets.filter(tk=>tk.c!==c);releaseSeat(c);
+  c.m.visible=true;c.m.position.set(R(-2,2),0,13);c.phase="leave";c.angry=true;c.tx=pick([-52,52]);
+  S.lost++;S.rep=clamp(S.rep-0.2,0,100);log("⌛ 提供が遅く、待ちきれず帰った客が…");
+  notifyStock("⌛ 提供が追いつかず客が帰った…人手か手伝いを！","slow",true);
+  pullFromQueue();
+}
+function serviceTick(dt,ts){
+  if(S.activeStore!==1)return; // 2号店滞在中は本店パイプラインは動かさない（決算で自動計算）
+  if(S.open)pullFromQueue();
+  for(let i=custs.length-1;i>=0;i--){
+    const c=custs[i];
+    if(c.phase==="walk"){
+      const w=c.wp[0];const dx=w[0]-c.m.position.x,dz=w[1]-c.m.position.z,d=Math.hypot(dx,dz);
+      if(d<0.8){c.wp.shift();if(!c.wp.length)onArrive(c);}
+      else{c.m.position.x+=dx/d*3.2*dt;c.m.position.z+=dz/d*3.2*dt;c.m.rotation.y=Math.atan2(dx,dz);c.m.position.y=Math.abs(Math.sin(ts*0.013+i))*0.12;}
+    }else if(c.phase==="queue"){
+      const tg=qTarget(c.qslot);const dx=tg[0]-c.m.position.x,dz=tg[1]-c.m.position.z,d=Math.hypot(dx,dz);
+      if(d>0.3){c.m.position.x+=dx/d*2.6*dt;c.m.position.z+=dz/d*2.6*dt;c.m.rotation.y=Math.atan2(dx,dz);}
+      else c.m.rotation.y=Math.PI; // 入口を向く
+      c.pat-=dt;
+      if(c.pat<=0){const qi=queue.indexOf(c);if(qi>=0){queue.splice(qi,1);reflowQueue();}
+        c.phase="leave";c.angry=true;c.tx=pick([-52,52]);S.lost++;S.rep=clamp(S.rep-0.15,0,100);
+        notifyStock("😞 行列に待ちきれず帰る客が…席を増やすか回転を上げよう","qleave",true);}
+    }else if(c.phase==="order"){
+      c.t-=dt;if(c.t<=0)makeOrder(c);
+    }else if(c.phase==="wait"){
+      c.wait+=dt;
+      if(c.served<c.order.length&&c.wait>42){abandon(c);}
+    }else if(c.phase==="eat"){
+      c.t-=dt;
+      if(c.t<=0){releaseSeat(c);c.m.visible=true;c.m.position.set(R(-2,2),0,13);c.phase="leave";c.angry=false;c.tx=pick([-52,52]);pullFromQueue();}
+    }else if(c.phase==="leave"){
+      const dx=c.tx-c.m.position.x;
+      c.m.position.x+=Math.sign(dx)*3.5*dt;c.m.position.z+=(0-c.m.position.z)*dt*0.5;
+      c.m.rotation.y=Math.atan2(Math.sign(dx),0);c.m.position.y=Math.abs(Math.sin(ts*0.02+i))*0.1;
+      if(Math.abs(dx)<2)removeCust(c);
+    }
+  }
+  processKitchen(dt);
+  // 座席の客を軽く揺らす
+  for(let i=0;i<S.seats;i++){if(seats[i]){const sm=seatMesh[i];sm.position.y=Math.abs(Math.sin(ts*0.006+i))*0.05;}}
+  updateKitchenStaff(ts);
+}
+function updateKitchenStaff(ts){
+  for(const p of POSN){
+    const list=staffListAt(p);
+    for(let i=0;i<3;i++){
+      const m=kMesh[p][i];
+      if(i<list.length){
+        m.visible=true;const sp=STA[p].spots[i];m.position.set(sp[0],0,sp[1]);m.rotation.y=Math.PI;
+        const busy=backlog(p)>0&&S.open;
+        m.position.y=busy?Math.abs(Math.sin(ts*0.013+i*1.3+POSN.indexOf(p)))*0.14:0;
+        const nm=list[i].name+(list[i].mina?"🎀":"");
+        if(m._nm!==nm)setMeshLabel(m,nm);
+      }else{m.visible=false;if(m._nm)setMeshLabel(m,"");}
+    }
+  }
+}
+// ---------------- 改善1: 材料不足の通知 ----------------
+function notifyStock(msg,key,useBanner){
+  if(stockWarned[key])return;stockWarned[key]=true;
+  if(useBanner)banner(msg);else toast(msg);
+}
+function neededTypes(){const s=new Set();ensureMenu();(S.menu||[]).forEach(d=>d.rec.forEach(t=>s.add(t)));return [...s];}
+function checkStockAfter(){
+  for(const t of neededTypes()){
+    const n=stockTotal(t);
+    if(n<=0)notifyStock("🚨 "+ING[t].e+ING[t].n+"が切れた！仕入れを！","out_"+t,true);
+    else if(n<=4)notifyStock("⚠️ "+ING[t].e+ING[t].n+"が残りわずか（"+n+"個）","low_"+t,false);
+  }
+}
+// ---------------- 改善2: 適切な仕入れ量サポート ----------------
+function estimateUse(t){
+  ensureMenu();
+  const dishesUsingT=(S.menu||[]).filter(d=>d.rec.includes(t)).length;
+  const total=(S.menu||[]).length||1;
+  const expCust=Math.round(18+S.rep*0.4);
+  return Math.round(expCust*1.8*(dishesUsingT/total));
+}
+function avgDailyUse(t){const h=S.useHist[t]||[];if(h.length)return h.reduce((a,b)=>a+b,0)/h.length;return estimateUse(t);}
+function recommendQty(t){
+  const need=Math.ceil(avgDailyUse(t)*1.5);
+  const rec=Math.max(0,need-stockTotal(t));
+  return Math.ceil(rec/5)*5;
 }
 // ---------------- INPUT ----------------
 const keys={};
 addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=true;
   if((e.key==="e"||e.key==="E"||e.key==="Enter")&&$("actBtn").style.display==="block")$("actBtn").click();
+  if((e.key==="q"||e.key==="Q")&&$("helpBtn").style.display==="block")$("helpBtn").click();
 });
 addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false;});
 const joy={on:false,dx:0,dz:0};
@@ -566,24 +918,43 @@ function ingUnit(shop,t){
   return Math.round(u);
 }
 function buyIng(shop,t,q,fee){
+  if(q<=0){toast("その量は0個です");return false;}
   const cost=ingUnit(shop,t)*q+(fee||0);
   if(S.money<cost){toast("💸 お金が足りない！");return false;}
   S.money-=cost;S.stock.push({t,n:q,q:SHOPS[shop].tier,day:S.day});
   log(SHOPS[shop].n+"で"+ING[t].n+q+"個（★"+(SHOPS[shop].tier+1)+"）を仕入れた");
   toast("📦 "+ING[t].e+ING[t].n+"×"+q+" 仕入れ完了！");
+  // 仕入れたら不足フラグ解除
+  ["out_"+t,"low_"+t,"nostock"].forEach(k=>delete stockWarned[k]);
   renderHud();return true;
 }
 function shopModal(shop){
   closeDlg();
   const s=SHOPS[shop];
+  const rows=s.types.map(t=>{
+    const rec=recommendQty(t);
+    const need=stockTotal(t)<=4;
+    return `<div class="line"><span>${ING[t].e} ${ING[t].n}（${fmt(ingUnit(shop,t))}/個・在庫${stockTotal(t)}${need?' <b style="color:var(--danger)">少</b>':''}）
+      <small style="color:#888">目安消費 ${Math.round(avgDailyUse(t))}/日</small></span><b>
+      <button class="tag" onclick="uiBuy('${shop}','${t}',10)">10</button>
+      <button class="tag" onclick="uiBuy('${shop}','${t}',30)">30</button>
+      ${rec>0?`<button class="tag on" onclick="uiBuy('${shop}','${t}',${rec})">推奨${rec}</button>`:`<button class="tag" disabled>足りてる</button>`}
+      </b></div>`;}).join("");
+  const bundle=s.types.map(t=>recommendQty(t)).reduce((a,b)=>a+b,0);
+  let bundleCost=0;s.types.forEach(t=>{bundleCost+=ingUnit(shop,t)*recommendQty(t);});
   modal(`<h2>📦 ${s.n}（品質★${s.tier+1}）</h2>
-  <p style="font-size:11px;color:#888">相場${Math.round(S.mktRate*100)}%・鮮度2日で廃棄。料理ごとに必要な材料が違う（メニュー表参照）</p>`+
-   s.types.map(t=>`<div class="line"><span>${ING[t].e} ${ING[t].n}（${fmt(ingUnit(shop,t))}/個・在庫${stockTotal(t)}）</span><b>
-    <button class="tag" onclick="uiBuy('${shop}','${t}',10)">10個</button>
-    <button class="tag" onclick="uiBuy('${shop}','${t}',30)">30個</button></b></div>`).join("")+
+  <p style="font-size:11px;color:#888">相場${Math.round(S.mktRate*100)}%・鮮度2日で廃棄。<b>推奨</b>＝直近の消費と客足から1.5日分を計算（5個単位）。</p>`+
+   rows+
+   (bundle>0?`<button class="btn acc" onclick="uiBundle('${shop}')">🧺 おまかせ仕入れ（推奨を一括 計${bundle}個・約${fmt(bundleCost)}）</button>`:"")+
    `<button class="btn" onclick="closeModal()">閉じる</button>`);
 }
 function uiBuy(shop,t,q){if(buyIng(shop,t,q,0))shopModal(shop);}
+function uiBundle(shop){
+  const s=SHOPS[shop];let bought=0;
+  for(const t of s.types){const q=recommendQty(t);if(q>0&&S.money>=ingUnit(shop,t)*q){buyIng(shop,t,q,0);bought++;}}
+  if(!bought)toast("仕入れる必要はなさそう（or 資金不足）");
+  shopModal(shop);
+}
 function dlgGyomu(){
   openDlg("🧊","店員クドウ","「安さは正義っす。全8種そろってますよ〜。ただし品質は★1、お察しっす」",
    [{label:"仕入れをする（全材料★1・激安）",cls:"go",fn:()=>shopModal("gyomu")},{label:"帰る",fn:closeDlg}]);
@@ -637,7 +1008,7 @@ function dlgBank(){
       S.money-=pay;S.loans-=pay;log("💴 "+fmt(pay)+"を返済");renderHud();dlgBank();
     }},
     {label:"経営の相談をする",sub:"アドバイスをくれる",fn:()=>{
-      const tips=["「客単価×客数−経費、これが全てです」","「食材の廃棄が一番の敵ですよ。仕入れは需要を読んで」","「評判60を超えたらフランチャイズ展開も視野に」","「広告は評判が低いうちに打つと効率的です」","「価格は適正価格より少し下が客足を作ります」"];
+      const tips=["「客単価×客数−経費、これが全てです」","「食材の廃棄が一番の敵ですよ。仕入れは需要を読んで」","「評判60を超えたらフランチャイズ展開も視野に」","「広告は評判が低いうちに打つと効率的です」","「席が足りないと行列で客を逃します。増席も投資です」","「SNS広告と高品質が噛み合うと“バズ”が起きますよ」"];
       openDlg("👔","銀行員サトウ",pick(tips),[{label:"なるほど",fn:closeDlg}]);
     }},
    ]);
@@ -651,6 +1022,7 @@ function dlgHw(){
    `「求人を出しますか？面接1回<b>¥5,000</b>です」<br>現在の従業員：${S.staff.length}人（人件費 日${fmt(S.staff.reduce((a,s)=>a+s.wage,0))}）`,
    [
     {label:"面接をひらく",sub:"¥5,000で応募者3名",fn:interview},
+    {label:"従業員の管理（昇給・相談・解雇）",sub:"雇用後のケアはこちら",fn:staffManageModal,dis:S.staff.length===0},
     {label:"やめておく",fn:closeDlg},
    ]);
 }
@@ -683,9 +1055,84 @@ function negotiateHire(i){
    ]);
 }
 function hire(i,wage){
-  const a=applicants[i];a.wage=wage;S.staff.push(a);applicants.splice(i,1);
+  const a=applicants[i];a.wage=wage;a.instr=null;S.staff.push(a);applicants.splice(i,1);
   toast("🎉 "+a.name+"を採用！");log(a.name+"が仲間になった（日給"+fmt(wage)+"）");
   showApplicants();
+}
+// ---------------- 改善5: 従業員の管理（昇給・相談・解雇） ----------------
+function staffManageModal(){
+  closeDlg();
+  if(!S.staff.length){toast("従業員がいません");return;}
+  modal(`<h2>👥 従業員の管理</h2>
+  <p style="font-size:11px;color:#888">昇給で士気UP＆離職防止。<b>相談にのる</b>と不安に寄り添える（1日1回）。解雇も可能。</p>`+
+   S.staff.map((s,i)=>{
+     const fair=s.wage>=s.skill*2800;
+     return `<div class="srow">
+      <span class="mood">${s.morale>60?"😊":s.morale>30?"😐":"😠"}</span>
+      <span class="nm">${s.mina?"🎀":""}${s.name} ★${s.skill}<br><small style="color:#888;font-weight:500">${s.quirk}／日給${fmt(s.wage)}${fair?"":' <b style="color:var(--danger)">薄給</b>'}／士気${Math.round(s.morale)}</small></span>
+      <button class="mini acc" onclick="raiseWageUI(${i})">昇給</button>
+      <button class="mini" onclick="consoleStaff(${i})">相談</button>
+      <button class="mini warn" onclick="fireStaffUI(${i})">解雇</button>
+     </div>`;}).join("")+
+   `<button class="btn" onclick="closeModal()">閉じる</button>`);
+}
+function raiseWageUI(i){
+  const s=S.staff[i];
+  modal(`<h2>💴 ${s.name} の昇給</h2>
+  <p style="font-size:12px;color:#666">現在 日給${fmt(s.wage)}／士気${Math.round(s.morale)}。昇給すると士気が上がり、辞めにくくなる（日々の人件費は増える）。</p>
+  <button class="opt go" onclick="doRaise(${i},1000)">+¥1,000／日<small>士気 +8</small></button>
+  <button class="opt go" onclick="doRaise(${i},2000)">+¥2,000／日<small>士気 +16</small></button>
+  <button class="opt go" onclick="doRaise(${i},3000)">+¥3,000／日<small>士気 +24・大喜び</small></button>
+  <button class="btn ghost" onclick="staffManageModal()">戻る</button>`);
+}
+function doRaise(i,amt){
+  const s=S.staff[i];s.wage+=amt;s.morale=Math.min(100,s.morale+amt/125);
+  toast("💴 "+s.name+"を昇給（日給"+fmt(s.wage)+"）");
+  banner("😊 "+s.name+"「ありがとうございます！がんばります！」");
+  log(s.name+"を昇給した（+"+fmt(amt)+"／日）");save();staffManageModal();
+}
+function consoleStaff(i){
+  const s=S.staff[i];
+  if(dayFlags["console_"+s.name]===S.day){toast("今日はもう"+s.name+"と話した");return;}
+  let worry,opts;
+  const lowWage=s.wage<s.skill*2800;
+  if(s.morale<35){
+    worry="「正直、最近ちょっと限界かもです…続けられるか不安で」";
+  }else if(lowWage){
+    worry="「あの…がんばってるつもりなんですけど、お給料のこと、少しだけ相談したくて」";
+  }else if(s.quirk==="気分屋"){
+    worry="「なんか今日はやる気が出なくて…すみません」";
+  }else{
+    worry="「店長、聞いてくださいよ〜。最近まかない何にしてます？（笑）」";
+  }
+  opts=[
+    {label:"じっくり話を聞く",sub:"寄り添う（士気+15）",cls:"go",fn:()=>{
+      dayFlags["console_"+s.name]=S.day;s.morale=Math.min(100,s.morale+15);gainXp("talk",1);
+      openDlg("🙂",s.name,"「…聞いてもらえて、少し楽になりました。ありがとうございます」",[{label:"また何でも話して",fn:staffManageModal}]);
+    }},
+    {label:"「いつも助かってる」と伝える",sub:"感謝（士気+10）",fn:()=>{
+      dayFlags["console_"+s.name]=S.day;s.morale=Math.min(100,s.morale+10);
+      openDlg("😊",s.name,"「そんな風に言ってもらえるなんて…！もっと頑張ります」",[{label:"頼りにしてるよ",fn:staffManageModal}]);
+    }},
+  ];
+  if(lowWage)opts.push({label:"昇給を提案する",sub:"給料の不安に応える",fn:()=>raiseWageUI(i)});
+  opts.push({label:"戻る",fn:staffManageModal});
+  openDlg("🙂",s.name+"の相談",worry,opts);
+}
+function fireStaffUI(i){
+  const s=S.staff[i];
+  openDlg("😟",s.name,"「え…わたし、クビ、ですか…？」",
+   [
+    {label:"解雇する",cls:"warn",sub:"戦力ダウン・他の従業員の士気も少し下がる",fn:()=>{
+      S.staff.splice(i,1);
+      POSN.forEach(p=>{S.formation[p]=(S.formation[p]||[]).filter(n=>n!==s.name);});
+      if(s.mina){S.minaKanban=false;}
+      S.staff.forEach(o=>o.morale=Math.max(0,o.morale-5));
+      S.rep=clamp(S.rep-1,0,100);
+      toast("👋 "+s.name+"を解雇した");log(s.name+"を解雇した（周囲の士気-）");save();staffManageModal();
+    }},
+    {label:"やっぱりやめる",fn:staffManageModal},
+   ]);
 }
 // ---------------- 広告社 ----------------
 function dlgAd(){
@@ -693,7 +1140,7 @@ function dlgAd(){
    `「宣伝しなきゃ、店は無いのと同じっすよ〜」<br>実施中：${S.ads.flyer>0?"チラシ残"+S.ads.flyer+"日 ":""}${S.ads.sns>0?"SNS残"+S.ads.sns+"日 ":""}${S.ads.tv>0?"TV残"+S.ads.tv+"日":""}`,
    [
     {label:"チラシ配布（3日間 集客+20%）",sub:"¥15,000",fn:()=>buyAd("flyer",15000,3)},
-    {label:"SNS運用代行（5日間 +35%）",sub:"¥30,000",fn:()=>buyAd("sns",30000,5)},
+    {label:"SNS運用代行（5日間 +35%・バズ誘発）",sub:"¥30,000",fn:()=>buyAd("sns",30000,5)},
     {label:"ローカルTVCM（4日間 +80%）",sub:"¥100,000",fn:()=>buyAd("tv",100000,4)},
     {label:"やめておく",fn:closeDlg},
    ]);
@@ -702,51 +1149,49 @@ function buyAd(k,cost,days){
   if(S.money<cost){toast("💸 お金が足りない");return;}
   S.money-=cost;S.ads[k]=days;toast("📣 広告スタート！");log("広告を出稿した");closeDlg();renderHud();
 }
-// ---------------- 不動産（2号店・FC） ----------------
+// ---------------- 不動産（2号店・移転・FC・本社） ----------------
 function dlgRe(){
   const opts=[];
   if(!S.st2.owned){
-    opts.push({label:"2号店物件を購入する",sub:"¥1,500,000・店長を任命して自動経営",dis:S.money<1500000,fn:()=>{
-      S.money-=1500000;S.st2.owned=true;
-      const lb=makeLabel("2号店",1,"rgba(217,93,57,.9)");lb.position.set(-18,8,20);scene.add(lb);
-      toast("🏢 2号店を購入！店長を任命しよう");log("2号店を手に入れた！");closeDlg();renderHud();
-    }});
+    opts.push({label:"2号店を出す（場所を選ぶ）",cls:"go",sub:"¥1,500,000・全国どこでも／コンセプトも自由",dis:S.money<1500000,fn:()=>openNationalMap("store2")});
   }else{
-    opts.push({label:"2号店の店長を任命する",sub:S.st2.mgr?("現店長："+S.st2.mgr.name):"従業員から選ぶ（腕前が利益に直結）",fn:pickMgr});
+    opts.push({label:"2号店へ行く（"+PREF[S.st2.pref].short+"・"+CONCEPTS[S.st2.concept].n+"）",cls:"go",sub:"旅行して入店・店長に指示を出す",fn:()=>openNationalMap("travel")});
+    opts.push({label:"2号店の店長を任命/変更",sub:S.st2.mgr?("現店長："+S.st2.mgr.name):"⚠️店長不在（利益が出ない）",fn:pickMgr});
+    opts.push({label:"2号店にスタッフを送る",sub:"本店の従業員を2号店へ異動（現在"+S.st2.staff.length+"人）",fn:sendStaff2,dis:S.staff.length===0});
   }
   if(S.st2.owned&&S.rep>=60){
     opts.push({label:"フランチャイズ契約を結ぶ",sub:`加盟金+¥500,000／ロイヤリティ収入／現在${S.fr}店舗`,dis:S.fr>=5,fn:()=>{
-      S.money+=500000;S.fr++;S.brand+=5;
-      banner("🎊 フランチャイズ"+S.fr+"号店が誕生！");log("FC加盟店が増えた（計"+S.fr+"）");closeDlg();renderHud();
+      S.money+=500000;S.fr++;S.brand+=5;banner("🎊 フランチャイズ"+S.fr+"号店が誕生！");log("FC加盟店が増えた（計"+S.fr+"）");closeDlg();renderHud();
     }});
   }else if(S.st2.owned){
     opts.push({label:"フランチャイズ展開（条件未達）",sub:"評判60以上が必要（現在"+Math.round(S.rep)+"）",dis:true,fn:null});
   }
-  opts.push({label:"店を移転する",sub:"¥300,000・別の都市へ（評判は3割目減り）",dis:S.money<300000,fn:relocModal});
+  opts.push({label:"本店を移転する",sub:"¥300,000・別の県へ（評判は3割目減り）",dis:S.money<300000,fn:()=>openNationalMap("reloc")});
   if(S.fr>=2&&!S.hq){
     opts.push({label:"本社ビルを建てる",sub:"¥3,000,000・全店舗を一括管理するダッシュボード",dis:S.money<3000000,fn:()=>{
-      S.money-=3000000;S.hq=true;buildHQ();
-      banner("🏢 本社ビル竣工！！社長の風格が出てきた");log("本社ビルが建った");closeDlg();renderHud();save();
+      S.money-=3000000;S.hq=true;buildHQ();banner("🏢 本社ビル竣工！！社長の風格が出てきた");log("本社ビルが建った");closeDlg();renderHud();save();
     }});
   }
   opts.push({label:"帰る",fn:closeDlg});
-  openDlg("🏢","不動産ヤマダ","「事業拡大のご相談ですね。物件からフランチャイズ、移転まで、なんでもどうぞ」",opts);
+  openDlg("🏢","不動産ヤマダ","「事業拡大のご相談ですね。2号店の出店から移転、フランチャイズまで、なんでもどうぞ」",opts);
 }
-function relocModal(){
-  closeDlg();
-  modal(`<h2>🚚 移転先を選ぶ（¥300,000）</h2>
-  <p style="font-size:12px;color:#666">土地が変われば家賃も客層も変わる。評判は7割持っていける。</p>`+
-   Object.keys(CITIES).filter(k=>k!==S.city).map(k=>{const c=CITIES[k];
-    return `<button class="opt" onclick="doReloc('${k}')">${c.e} ${c.n}<small>家賃 日${fmt(c.rent+3000)}・${c.desc}</small></button>`;}).join("")+
-   `<button class="btn ghost" onclick="closeModal()">やめる</button>`);
+function pickMgr(){
+  if(!S.staff.length){openDlg("🏢","不動産ヤマダ","「店長にできる従業員がいませんよ。まずハローワークで雇いましょう」",[{label:"そうする",fn:closeDlg}]);return;}
+  openDlg("🏢","店長の任命","2号店を任せる従業員を選ぼう（本店の戦力からは外れる）",
+   S.staff.map((st,i)=>({label:st.name+"（腕前"+"★".repeat(st.skill)+"）",sub:"日給"+fmt(st.wage),fn:()=>{
+     if(S.st2.mgr)S.staff.push(S.st2.mgr);
+     S.st2.mgr=S.staff.splice(i,1)[0];
+     POSN.forEach(p=>{S.formation[p]=(S.formation[p]||[]).filter(n=>n!==S.st2.mgr.name);});
+     toast("👑 "+S.st2.mgr.name+"が2号店店長に！");closeDlg();save();
+   }})).concat([{label:"やめる",fn:closeDlg}]));
 }
-function doReloc(k){
-  if(S.money<300000){toast("¥300,000必要");return;}
-  S.money-=300000;S.city=k;S.rep=Math.round(S.rep*0.7);
-  applyTheme();closeModal();
-  banner("🚚 "+cityC().n+"へ移転！心機一転がんばろう");
-  log(cityC().n+"に店を移転した（評判は少し目減り）");
-  renderHud();save();
+function sendStaff2(){
+  if(!S.staff.length){toast("送れる従業員がいない");return;}
+  openDlg("🚚","2号店へ異動","誰を2号店に送る？（本店の戦力から外れる）",
+   S.staff.map((st,i)=>({label:st.name+" ★"+st.skill,sub:"日給"+fmt(st.wage),fn:()=>{
+     S.st2.staff.push(st);S.staff.splice(i,1);POSN.forEach(p=>{S.formation[p]=(S.formation[p]||[]).filter(n=>n!==st.name);});
+     toast("🚚 "+st.name+"を2号店へ異動");closeDlg();save();
+   }})).concat([{label:"やめる",fn:closeDlg}]));
 }
 function buildHQ(){
   building(-30,32,10,10,16,0x8a94a8,"本社ビル",0x4a5468);
@@ -756,8 +1201,8 @@ function dlgHQ(){
   if(!S.hq){toast("今は空きビルだ…");return;}
   const am=S.areaMgr;
   modal(`<h2>🏢 経営ダッシュボード</h2>
-  <div class="line"><span>${cityC().e} 本店（${conC().n}／内装Lv${S.interiorLv}）</span><b>本日 ${fmt(S.sales)}・${S.custs}人</b></div>
-  <div class="line"><span>2号店 ${S.st2.owned?(S.st2.mgr?"店長:"+S.st2.mgr.name:"⚠️店長不在"):"未購入"}</span><b>${S.st2.owned?"前日 "+fmt(S.st2.lastPl||0):"—"}</b></div>
+  <div class="line"><span>${prefC().e} 本店（${CONCEPTS[S.concept].n}／内装Lv${S.interiorLv}）</span><b>本日 ${fmt(S.sales)}・${S.custs}人</b></div>
+  <div class="line"><span>2号店 ${S.st2.owned?(PREF[S.st2.pref].short+"・"+(S.st2.mgr?"店長:"+S.st2.mgr.name:"⚠️店長不在")):"未購入"}</span><b>${S.st2.owned?"前日 "+fmt(S.st2.lastPl||0):"—"}</b></div>
   <div class="line"><span>FC加盟店 ${S.fr}店舗</span><b>前日ロイヤリティ ${fmt(S.lastRoy||0)}</b></div>
   <div class="line"><span>エリアマネージャー</span><b>${am?am.name+" ★"+am.skill+"（日給"+fmt(am.wage)+"）":"未任命"}</b></div>
   <div class="line"><span>ブランド力</span><b>${Math.round(S.brand)}／100</b></div>
@@ -774,110 +1219,266 @@ function pickAM(){
 }
 function setAM(i){
   const st=S.staff.splice(i,1)[0];st.wage=Math.round(st.wage*1.5);st.morale=90;S.areaMgr=st;
+  POSN.forEach(p=>{S.formation[p]=(S.formation[p]||[]).filter(n=>n!==st.name);});
   toast("👑 "+st.name+"がエリアマネージャーに昇進！");dlgHQ();save();
 }
 function fireAM(){S.staff.push(S.areaMgr);S.areaMgr=null;toast("エリアMgrを解任した");dlgHQ();save();}
-// ---------------- 都市の風景 ----------------
-function applyTheme(){
-  const T={tokyo:{g:0x9aa0a0,leaf:0x4e8f4e},osaka:{g:0xa8b088,leaf:0x5e9f4e},kyoto:{g:0xb0a488,leaf:0xa06a3e},fukuoka:{g:0x9dbf7e,leaf:0x4e8f4e},sapporo:{g:0xe4e9ee,leaf:0xcfdde6},okinawa:{g:0xd8c9a0,leaf:0x3ea06e}}[S.city];
-  if(!T)return;
-  ground.material.color.setHex(T.g);
-  treeLeaves.forEach(l=>l.material.color.setHex(T.leaf));
-  if(themeG)scene.remove(themeG);
-  themeG=new THREE.Group();
+// 公園と木
+let themeG=null;const treeLeaves=[];
+function tree(x,z,s){
+  s=s||1;const g=new THREE.Group();
+  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.3*s,0.4*s,1.6*s),new THREE.MeshLambertMaterial({color:0x7a5230}));
+  trunk.position.y=0.8*s;g.add(trunk);
+  const leaf=new THREE.Mesh(new THREE.ConeGeometry(1.6*s,3*s,7),new THREE.MeshLambertMaterial({color:0x4e8f4e}));
+  leaf.position.y=3*s;g.add(leaf);treeLeaves.push(leaf);
+  g.position.set(x,0,z);scene.add(g);
+}
+[[36,14],[40,20],[33,24],[44,15],[38,28],[-46,30],[46,34],[-44,-30],[48,-30],[-48,10]].forEach(p=>tree(p[0],p[1]));
+const bench=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.5,0.8),new THREE.MeshLambertMaterial({color:0x8a6a4a}));
+bench.position.set(38,0.5,22);scene.add(bench);
+const parkLb=makeLabel("公園",1,"rgba(47,111,94,.85)");parkLb.position.set(38,6,20);scene.add(parkLb);
+// ---------------- 県のランドマーク・風景 ----------------
+function buildLandmark(type){
   const M=(geo,c)=>new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:c}));
-  if(S.city==="tokyo"){ // 赤い電波塔
+  if(type==="tower"){
     const t1=M(new THREE.ConeGeometry(4,22,4),0xd94a2a);t1.position.set(46,11,-32);themeG.add(t1);
     const t2=M(new THREE.ConeGeometry(1.6,6,4),0xf0f0f0);t2.position.set(46,25,-32);themeG.add(t2);
-  }else if(S.city==="osaka"){ // 城
+  }else if(type==="castle"){
     const b1=M(new THREE.BoxGeometry(9,4,9),0xb8b4aa);b1.position.set(46,2,-32);themeG.add(b1);
     const b2=M(new THREE.BoxGeometry(7,5,7),0xe8e4da);b2.position.set(46,6.5,-32);themeG.add(b2);
     const r1=M(new THREE.ConeGeometry(5.5,3,4),0x2f6f5e);r1.position.set(46,10.5,-32);themeG.add(r1);
     const sh=M(new THREE.SphereGeometry(0.8,8,8),0xc9a227);sh.position.set(46,12.5,-32);themeG.add(sh);
-  }else if(S.city==="kyoto"){ // 鳥居の列
-    for(let i=0;i<3;i++){
-      const x=40+i*5;
+  }else if(type==="torii"){
+    for(let i=0;i<3;i++){const x=40+i*5;
       const p1=M(new THREE.CylinderGeometry(0.4,0.5,7),0xc03020);p1.position.set(x,3.5,-32);themeG.add(p1);
       const p2=M(new THREE.CylinderGeometry(0.4,0.5,7),0xc03020);p2.position.set(x+3,3.5,-32);themeG.add(p2);
       const bar=M(new THREE.BoxGeometry(4.8,0.7,0.9),0xc03020);bar.position.set(x+1.5,7.2,-32);themeG.add(bar);
     }
-  }else if(S.city==="fukuoka"){ // 屋台の列
-    for(let i=0;i<3;i++){
-      const x=12+i*5;
+  }else if(type==="yatai"){
+    for(let i=0;i<3;i++){const x=12+i*5;
       const st=M(new THREE.BoxGeometry(3,2.4,2),0xd9a066);st.position.set(x,1.2,-36);themeG.add(st);
       const aw=M(new THREE.BoxGeometry(3.4,0.3,2.6),0xd94a2a);aw.position.set(x,2.7,-36);themeG.add(aw);
       const ln=M(new THREE.SphereGeometry(0.35,8,8),0xff7a3a);ln.position.set(x,2,-34.7);themeG.add(ln);
     }
-  }else if(S.city==="sapporo"){ // 雪だるまと時計台
+  }else if(type==="snow"){
     const b1=M(new THREE.SphereGeometry(2.4,10,10),0xffffff);b1.position.set(46,2.2,-32);themeG.add(b1);
     const b2=M(new THREE.SphereGeometry(1.6,10,10),0xffffff);b2.position.set(46,5.4,-32);themeG.add(b2);
     const nose=M(new THREE.ConeGeometry(0.25,1.2,6),0xe08a3e);nose.rotation.x=Math.PI/2;nose.position.set(46,5.5,-30.2);themeG.add(nose);
     const ck=M(new THREE.BoxGeometry(4,6,4),0xe8e0d0);ck.position.set(38,3,-34);themeG.add(ck);
     const cr=M(new THREE.ConeGeometry(3.2,2.5,4),0xa03030);cr.position.set(38,7.2,-34);themeG.add(cr);
-  }else if(S.city==="okinawa"){ // 海とヤシの木
+  }else if(type==="sea"){
     const sea=new THREE.Mesh(new THREE.PlaneGeometry(220,44),new THREE.MeshLambertMaterial({color:0x3aa9d9}));
     sea.rotation.x=-Math.PI/2;sea.position.set(0,0.015,-82);themeG.add(sea);
     for(const px of [-48,48,-20,26]){
       const tr=M(new THREE.CylinderGeometry(0.3,0.45,5.5),0x9a7a4a);tr.position.set(px,2.7,px>0?30:28);themeG.add(tr);
-      for(let a=0;a<5;a++){
-        const lf=M(new THREE.SphereGeometry(1.3,6,6),0x2f8f5e);
-        lf.scale.set(1.7,0.22,0.5);lf.rotation.y=a*1.256;lf.position.set(px,5.6,px>0?30:28);themeG.add(lf);
-      }
+      for(let a=0;a<5;a++){const lf=M(new THREE.SphereGeometry(1.3,6,6),0x2f8f5e);lf.scale.set(1.7,0.22,0.5);lf.rotation.y=a*1.256;lf.position.set(px,5.6,px>0?30:28);themeG.add(lf);}
     }
+  }else if(type==="mountain"){
+    const m1=M(new THREE.ConeGeometry(9,13,5),0x6a7f5a);m1.position.set(46,6.5,-34);themeG.add(m1);
+    const cap=M(new THREE.ConeGeometry(3.4,4,5),0xffffff);cap.position.set(46,12,-34);themeG.add(cap);
+    const m2=M(new THREE.ConeGeometry(6,8,5),0x5f7350);m2.position.set(36,4,-35);themeG.add(m2);
+  }else if(type==="volcano"){
+    const v=M(new THREE.ConeGeometry(9,12,6),0x5a4a44);v.position.set(46,6,-34);themeG.add(v);
+    const sm=M(new THREE.SphereGeometry(2.2,8,8),0x9a9a9a);sm.position.set(46,13,-34);themeG.add(sm);
+    const sm2=M(new THREE.SphereGeometry(1.6,8,8),0xb0b0b0);sm2.position.set(47.5,15.5,-34);themeG.add(sm2);
+  }else{ // tree（地方汎用）
+    for(const px of [42,48,36,46]){const tr=M(new THREE.CylinderGeometry(0.4,0.55,3),0x7a5230);tr.position.set(px,1.5,-33);themeG.add(tr);
+      const lf=M(new THREE.ConeGeometry(2.2,4,7),0x3e8f4e);lf.position.set(px,4.5,-33);themeG.add(lf);}
   }
+}
+function applyTheme(){
+  const p=PREF[curPrefKey()];if(!p)return;
+  const reg=REGIONS[p.r];
+  ground.material.color.setHex(reg.g);
+  treeLeaves.forEach(l=>l.material.color.setHex(reg.leaf));
+  if(themeG)scene.remove(themeG);
+  themeG=new THREE.Group();
+  buildLandmark(p.lm||reg.lm);
   scene.add(themeG);
 }
-function pickMgr(){
-  if(!S.staff.length){openDlg("🏢","不動産ヤマダ","「店長にできる従業員がいませんよ。まずハローワークで雇いましょう」",[{label:"そうする",fn:closeDlg}]);return;}
-  openDlg("🏢","店長の任命","2号店を任せる従業員を選ぼう（本店の戦力からは外れる）",
-   S.staff.map((st,i)=>({label:st.name+"（腕前"+"★".repeat(st.skill)+"）",sub:"日給"+fmt(st.wage),fn:()=>{
-     if(S.st2.mgr)S.staff.push(S.st2.mgr);
-     S.st2.mgr=S.staff.splice(i,1)[0];
-     toast("👑 "+S.st2.mgr.name+"が2号店店長に！");closeDlg();
-   }})).concat([{label:"やめる",fn:closeDlg}]));
+function repaintShop(){B.shop.children[0].material.color.setHex(conC().color);}
+// ---------------- 全国マップUI・移動 ----------------
+let mapMode="travel",pendingStore2Pref=null;
+function openNationalMap(mode){
+  mapMode=mode||"travel";closeDlg();
+  const here=curPrefKey();
+  const dots=PREFKEYS.map(k=>{const p=PREF[k];
+    let cls="pdot";
+    if(k===here)cls+=" here";else if(S.city===k)cls+=" store";else if(S.st2.owned&&S.st2.pref===k)cls+=" store2";
+    return `<div class="${cls}" style="left:${p.x}%;top:${p.y}%" onclick="mapPick('${k}')" title="${p.n}"></div>
+      <div class="plabel" style="left:${p.x}%;top:${(p.y+3.6)}%">${p.short}</div>`;}).join("");
+  const title={start:"🗾 開業する県を選ぶ",reloc:"🗾 本店の移転先を選ぶ（¥300,000）",store2:"🗾 2号店を出す県を選ぶ",travel:"🗾 全国マップ"}[mapMode];
+  const help={start:"日本のどこで人生を始める？家賃・人通り・客層が変わる。",
+    reloc:"別の県へ移転（評判は7割持っていける）。",store2:"2号店の場所。コンセプトは本店と別でもOK。",
+    travel:"移動できるのは自分の店がある県だけ（🟢本店／🟡2号店）。運賃と時間がかかる。"}[mapMode];
+  modal(`<h2>${title}</h2>
+   <p class="reglegend">${help}</p>
+   <div class="jpmap"><div class="sea"></div>${dots}</div>
+   <div class="reglegend">🔴現在地　🟢本店　🟡2号店　—　タップで選択</div>
+   <button class="btn ghost" onclick="closeModal()">${mapMode==="travel"?"閉じる":"やめる"}</button>`);
+}
+function mapPick(k){
+  const p=PREF[k];
+  if(mapMode==="start"){S.city=k;applyTheme();closeModal();conceptModal(false);return;}
+  if(mapMode==="reloc"){if(k===S.city){toast("すでにその県です");return;}doReloc(k);return;}
+  if(mapMode==="store2"){chooseStore2Loc(k);return;}
+  // travel
+  if(k===S.city)travelTo(1);
+  else if(S.st2.owned&&S.st2.pref===k)travelTo(2);
+  else toast("そこにはまだ店がありません（2号店の出店か移転を）");
+}
+function doReloc(k){
+  if(S.money<300000){toast("¥300,000必要");return;}
+  S.money-=300000;S.city=k;S.rep=Math.round(S.rep*0.7);S.activeStore=1;
+  applyTheme();repaintShop();closeModal();
+  banner("🚚 "+PREF[k].n+"へ移転！心機一転がんばろう");
+  log(PREF[k].n+"に本店を移転した（評判は少し目減り）");
+  renderHud();save();
+}
+function chooseStore2Loc(k){
+  pendingStore2Pref=k;
+  modal(`<h2>🏮 2号店（${PREF[k].short}）のコンセプト</h2>
+   <p style="font-size:12px;color:#666">本店と違ってもOK。土地柄（${prefDesc(k)}）に合わせて選ぼう。</p>`+
+   Object.keys(CONCEPTS).map(c=>`<button class="opt" onclick="confirmStore2('${c}')">${CONCEPTS[c].e} ${CONCEPTS[c].n}<small>${CONCEPTS[c].desc}</small></button>`).join("")+
+   `<button class="btn ghost" onclick="openNationalMap('store2')">場所を選び直す</button>`);
+}
+function confirmStore2(concept){
+  if(S.money<1500000){toast("¥1,500,000必要");closeModal();return;}
+  S.money-=1500000;S.st2.owned=true;S.st2.pref=pendingStore2Pref;S.st2.concept=concept;S.st2.rep=20;S.st2.interiorLv=1;
+  closeModal();
+  banner("🏢 "+PREF[S.st2.pref].short+"に2号店（"+CONCEPTS[concept].n+"）を出店！");
+  log("2号店を"+PREF[S.st2.pref].n+"に出店した");renderHud();save();
+  openDlg("🏢","不動産ヤマダ","「開店おめでとうございます！さっそく店長を任命しますか？（不在だと赤字になります）」",
+   [{label:"店長を任命する",cls:"go",fn:pickMgr},{label:"あとで",fn:closeDlg}]);
+}
+function travelTo(store){
+  const destPref=store===2?S.st2.pref:S.city;
+  const fromPref=curPrefKey();
+  if(store===S.activeStore){toast("すでにここにいます");closeModal();return;}
+  const dist=Math.hypot(PREF[destPref].x-PREF[fromPref].x,PREF[destPref].y-PREF[fromPref].y);
+  const fare=Math.round(2000+dist*280);
+  const hrs=clamp(Math.round(dist/12),1,6);
+  if(S.money<fare){toast("運賃"+fmt(fare)+"が足りない");return;}
+  S.money-=fare;S.tmin=Math.min(1439,S.tmin+hrs*60);
+  if(S.activeStore===1)S.open=false; // 本店を離れると自動閉店
+  resetService();
+  S.activeStore=store;S.inside=false;player.position.set(0,0,12);
+  for(let i=0;i<MAXSEATS;i++)seatMesh[i].visible=false;
+  applyTheme();repaintShop();closeModal();
+  banner("🚄 "+PREF[destPref].short+"へ移動（運賃"+fmt(fare)+"・"+hrs+"時間）");
+  log((store===2?"2号店":"本店")+"（"+PREF[destPref].short+"）へ移動した");
+  renderHud();save();
+}
+$("mapBtn").onclick=()=>openNationalMap("travel");
+// ---------------- コンセプト選択（本店） ----------------
+function conceptModal(change){
+  if(change&&dlgOn)closeDlg();
+  modal(`<h2>${change?"🛠 業態転換（¥150,000）":"🏮 本店のコンセプトを決めよう"}</h2>`+
+   Object.keys(CONCEPTS).map(k=>{const c=CONCEPTS[k];
+    return `<button class="opt" onclick="chooseConcept('${k}',${change?1:0})">${c.e} ${c.n}<small>${c.desc}</small></button>`;}).join("")+
+   (change?'<button class="btn ghost" onclick="closeModal()">やめる</button>':""));
+}
+function chooseConcept(k,change){
+  if(change){
+    if(S.money<150000){toast("¥150,000必要");return;}
+    if(S.concept===k){toast("いまと同じコンセプトだ");return;}
+    S.money-=150000;
+  }
+  S.concept=k;
+  S.menu=BASE_MENUS[k].slice(0,Math.max(2,Math.min(6,Math.ceil(S.quality*0.6)))).map(d=>({n:d.n,rec:d.rec.slice()}));
+  repaintShop();closeModal();
+  banner(conC().e+" "+prefC().short+"に「"+CONCEPTS[k].n+"」"+(change?"へ業態転換！":"を開業！"));
+  log(change?"店を「"+CONCEPTS[k].n+"」に改装した":prefC().n+"で「"+CONCEPTS[k].n+"」を開業した");
+  save();renderHud();
 }
 // ---------------- 自分の店 ----------------
 function dlgShop(){
+  if(S.activeStore===2){dlgShop2();return;}
   ensureMenu();
   const spoilSoon=S.stock.filter(s=>S.day-s.day>=1).reduce((a,s)=>a+s.n,0);
   const invStr=ALLT.filter(t=>stockTotal(t)>0).map(t=>ING[t].e+stockTotal(t)).join(" ")||"なし";
+  const out=neededTypes().filter(t=>stockTotal(t)<=0);
   openDlg("🏮","じぶんの店",
-   `材料：${invStr}（明日廃棄 ${spoilSoon}個）<br>基準単価 <b>${fmt(S.price)}</b>（適正${fmt(fairPrice())}）／品質Lv<b>${S.quality}</b>・${S.menu.length}品目<br>本日 ${S.custs}人来店 ${fmt(S.sales)}・習慣化Lv<b>${S.habit}</b>`,
+   `材料：${invStr}（明日廃棄 ${spoilSoon}個）${out.length?'<br><b style="color:var(--danger)">⚠️ '+out.map(t=>ING[t].n).join("・")+'が在庫切れ！</b>':""}<br>基準単価 <b>${fmt(S.price)}</b>（適正${fmt(fairPrice())}）／品質Lv<b>${S.quality}</b>・${S.menu.length}品目・席${S.seats}<br>本日 ${S.custs}人来店 ${fmt(S.sales)}${S.lost>0?"・逃し"+S.lost+"人":""}・行列${queue.length}・習慣化Lv<b>${S.habit}</b>`,
    [
     {label:S.open?"閉店する":"開店する",cls:"go",sub:S.open?"営業終了":"客を迎える（在庫と人手が必要）",fn:()=>{toggleShop();dlgShop();}},
+    {label:"厨房に入って手伝う",sub:"店内へ。各持ち場で手伝い・指示（客足+10%）",fn:enterKitchen},
+    {label:"フォーメーション編成（各3人まで）",sub:POSN.map(p=>PNAME[p].slice(2)+(S.formation[p].length?"："+S.formation[p].length+"人":"：空き")).join("／"),fn:formationModal},
     {label:"メニュー表を見る・改名",sub:S.menu.slice(0,3).map(d=>d.n).join("・")+(S.menu.length>3?" 他"+(S.menu.length-3)+"品":""),fn:menuModal},
-    {label:"厨房に入る",sub:"店内へ。厨房采配・フォーメーション編成・調理指導（客足+10%）",fn:()=>{
-      closeDlg();S.inside=true;player.position.set(200,0,204);toast("🚪 店内に入った（コンロで采配開始・出口は南側）");
-    }},
+    {label:"席数を増やす（行列対策）",sub:"現在 "+S.seats+"席／最大"+MAXSEATS+"席",fn:seatsModal},
+    {label:"従業員の管理（昇給・相談・解雇）",sub:"従業員 "+S.staff.length+"人",dis:S.staff.length===0,fn:staffManageModal},
     {label:"価格を設定する",sub:"高いほど客足は鈍る。品質と相談",fn:priceModal},
-    {label:"メニュー研究をする",sub:"¥5,000＋食材5個＋体力15／品質を上げる",fn:research},
-    {label:"内装をグレードアップ",sub:S.interiorLv>=5?"最高級の内装だ（Lv5）":"¥"+(80000*S.interiorLv).toLocaleString()+"／内装Lv"+S.interiorLv+"→"+(S.interiorLv+1)+"（客足と適正価格UP）",dis:S.interiorLv>=5,fn:()=>{
-      const c=80000*S.interiorLv;
-      if(S.money<c){toast("💸 お金が足りない");return;}
+    {label:"メニュー研究をする",sub:"¥5,000〜＋食材5個＋体力15／品質UP",fn:research},
+    {label:"内装をグレードアップ",sub:S.interiorLv>=5?"最高級の内装だ（Lv5）":"¥"+(80000*S.interiorLv).toLocaleString()+"／内装Lv"+S.interiorLv+"→"+(S.interiorLv+1),dis:S.interiorLv>=5,fn:()=>{
+      const c=80000*S.interiorLv;if(S.money<c){toast("💸 お金が足りない");return;}
       S.money-=c;S.interiorLv++;banner("🛠 内装がLv"+S.interiorLv+"にグレードアップ！");closeDlg();renderHud();save();
     }},
-    {label:"コンセプトを変更する",sub:"¥150,000／"+conC().e+" "+conC().n+"から業態転換（客層が変わる）",fn:()=>conceptModal(true)},
+    {label:"コンセプトを変更する",sub:"¥150,000／"+conC().e+" "+conC().n+"から業態転換",fn:()=>conceptModal(true)},
     {label:"店を掃除する",sub:"体力10・評判が少し上がる（1日1回）",fn:()=>{
       if(dayFlags["clean"]===S.day){toast("今日はもうピカピカだ");return;}
-      if(!useStam(10))return;
-      dayFlags["clean"]=S.day;
-      S.rep=clamp(S.rep+0.8,0,100);toast("🧹 店がきれいになった（評判+）");closeDlg();
+      if(!useStam(10))return;dayFlags["clean"]=S.day;S.rep=clamp(S.rep+0.8,0,100);toast("🧹 店がきれいになった（評判+）");closeDlg();
     }},
     {label:"出る",fn:closeDlg},
    ]);
 }
+function enterKitchen(){
+  closeDlg();S.inside=true;player.position.set(200,0,206);
+  toast("🚪 店内へ。持ち場に近づいて『手伝う』、スタッフに『指示』");
+}
+function exitShop(){S.inside=false;player.position.set(0,0,13);kPost=null;toast("🚪 外に出た");}
 function toggleShop(){
   if(!S.open){
     if(stockTotal()<=0){toast("⚠️ 食材がない！市場で仕入れよう");return;}
-    S.open=true;banner("🏮 開店！いらっしゃいませ〜");log("店を開けた");
+    S.open=true;banner("🏮 開店！いらっしゃいませ〜");log("店を開けた");stockWarned={};
   }else{S.open=false;banner("🔒 本日の営業終了");log("店を閉めた");}
   renderHud();
 }
 $("shopBtn").onclick=()=>{
+  if(S.activeStore===2){dlgShop2();return;}
   const d=Math.hypot(player.position.x-0,player.position.z-14);
-  if(d>12){toast("店の前まで行かないと開け閉めできない");return;}
+  if(d>12&&!S.inside){toast("店の前まで行かないと開け閉めできない");return;}
   toggleShop();
 };
+// 席数
+function seatsModal(){
+  closeDlg();
+  const atMax=S.seats>=MAXSEATS;
+  const add=Math.min(2,MAXSEATS-S.seats);
+  const cost=60000+(S.seats-4)*25000;
+  modal(`<h2>🪑 席数を増やす</h2>
+   <p style="font-size:12px;color:#666">現在 <b>${S.seats}席</b>（最大${MAXSEATS}）。席が多いほど行列を捌けて回転UP。満席だと行列ができ、待ちきれない客は帰ってしまう。</p>
+   ${atMax?'<p style="color:var(--accent2);font-weight:700">最大席数です！</p>':
+     `<button class="opt go" onclick="buySeats(${add},${cost})">+${add}席にする（${fmt(cost)}）<small>${S.seats}→${S.seats+add}席</small></button>`}
+   <button class="btn ghost" onclick="closeModal()">閉じる</button>`);
+}
+function buySeats(add,cost){
+  if(S.money<cost){toast("💸 お金が足りない");return;}
+  S.money-=cost;S.seats=Math.min(MAXSEATS,S.seats+add);
+  banner("🪑 席を増やした（"+S.seats+"席）");log("席数を"+S.seats+"席に増やした");closeModal();renderHud();save();
+}
+// フォーメーション（各持ち場 最大3人）
+function formationModal(){
+  closeDlg();
+  modal(`<h2>👥 フォーメーション編成（各持ち場 最大3人）</h2>
+   <p style="font-size:11px;color:#888">同じ配置を続けると<b>習慣化Lv</b>が育つ。空き＝あなたが厨房で手伝える。性格が活きる：接客の天才→接客／研究熱心→調理／早起き→昼。</p>`+
+   POSN.map(p=>{const list=S.formation[p]||[];
+     return `<div style="margin:8px 0;border-bottom:1px dashed var(--line);padding-bottom:8px">
+       <div style="font-weight:700;font-size:13px">${PNAME[p]}（${list.length}/3）</div>
+       <div style="margin:4px 0">${list.map(n=>`<button class="tag on" onclick="unassign('${p}','${n}')">${n} ✕</button>`).join("")||'<span style="color:#888;font-size:11px">空き</span>'}</div>
+       ${list.length<3?`<button class="mini" onclick="assignUI('${p}')">＋配置する</button>`:""}
+     </div>`;}).join("")+
+   `<button class="btn" onclick="closeModal()">決定</button>`);
+}
+function assignUI(p){
+  const used=assignedNames();
+  const avail=S.staff.filter(s=>!used.has(s.name));
+  modal(`<h2>${PNAME[p]} に配置</h2>`+
+   (avail.length?avail.map(s=>`<button class="opt" onclick="doAssign('${p}','${s.name}')">${s.name} ★${s.skill}<small>${s.quirk}／機嫌${s.morale>60?"😊":s.morale>30?"😐":"😠"}</small></button>`).join(""):'<p style="color:#888;font-size:12px">配置できる空きスタッフがいない（雇用するか、他の持ち場から外す）</p>')+
+   `<button class="btn ghost" onclick="formationModal()">戻る</button>`);
+}
+function doAssign(p,name){if((S.formation[p]||[]).length<3)S.formation[p]=(S.formation[p]||[]).concat([name]);save();formationModal();}
+function unassign(p,name){S.formation[p]=(S.formation[p]||[]).filter(n=>n!==name);save();formationModal();}
+// 価格・研究・メニュー
 function priceModal(){
   closeDlg();
   modal(`<h2>価格戦略</h2>
@@ -894,19 +1495,63 @@ function research(){
   if(!useStam(15))return;
   S.money-=cost;consumeStock(5);gainXp("cook",2);
   if(Math.random()<0.45+skillLv("cook")*0.06){
-    ensureMenu();
-    const d=genDish();S.menu.push(d);S.quality++;
+    ensureMenu();const d=genDish();S.menu.push(d);S.quality++;
     banner("✨ 新メニュー「"+d.n+"」を開発！（メニュー表から改名できる）");
     log("メニュー研究に成功！（"+S.menu.length+"品目）");
-  }else{toast("🍳 うーん、いまいち…（料理経験は積めた）");}
+  }else toast("🍳 うーん、いまいち…（料理経験は積めた）");
   closeDlg();renderHud();
 }
-function consumeStock(n){
-  S.stock.sort((a,b)=>a.day-b.day);
-  let left=n,qacc=0;
-  for(const s of S.stock){const t=Math.min(s.n,left);s.n-=t;left-=t;qacc+=t*(s.q===undefined?1:s.q);if(left<=0)break;}
-  S.stock=S.stock.filter(s=>s.n>0);
-  return n>0?qacc/n:1;
+function menuModal(){
+  closeDlg();ensureMenu();
+  modal(`<h2>${conC().e} ${conC().n}のメニュー表（${S.menu.length}品）</h2>`+
+   S.menu.map((d,i)=>`<div class="line"><span>${d.n} <span style="font-size:10px;color:#888">${d.rec.map(t=>ING[t].e).join("")}</span></span>
+   <b>${fmt(dishPrice(i))} <button class="tag" onclick="renameDish(${i})">✏️</button></b></div>`).join("")+
+   `<p style="font-size:11px;color:#888;margin-top:8px">絵文字＝必要材料（切らすとその料理は出せない）。✏️で改名。絶品ストック：${S.cookQ}</p>
+   <button class="btn" onclick="closeModal()">閉じる</button>`);
+}
+function renameDish(i){
+  const n=prompt("新しいメニュー名（12文字まで）",S.menu[i].n);
+  if(n&&n.trim()){S.menu[i].n=n.trim().slice(0,12);save();}
+  menuModal();
+}
+// ================= 改善6: 空間厨房の手伝い・指示 =================
+const HELPPT={prep:[195.0,201.5],main:[200.0,201.5],serve:[205.4,201.5]};
+const HELPVERB={prep:"隣で一緒に切る",main:"火加減を見て手伝う",serve:"料理を客席へ運ぶ"};
+function toggleHelp(p){
+  kPost=(kPost===p)?null:p;
+  toast(kPost?"🤝 "+PNAME[p].slice(2)+"に入った！（あなたも1人分の戦力）":"手伝いをやめた");
+}
+function nearestStation(){
+  if(!S.inside)return null;
+  let best=null,bd=2.4;
+  for(const p of POSN){const d=Math.hypot(player.position.x-HELPPT[p][0],player.position.z-HELPPT[p][1]);if(d<bd){bd=d;best=p;}}
+  return best;
+}
+function stationDialog(p){
+  const list=staffListAt(p);
+  const opts=[];
+  opts.push({label:kPost===p?"✋ 手伝いをやめる":"🤝 手伝う（"+HELPVERB[p]+"）",cls:"go",fn:()=>{toggleHelp(p);closeDlg();}});
+  list.forEach(st=>opts.push({label:"🗣 "+st.name+"に指示",sub:"今の指示："+(st.instr==="hurry"?"急いで":st.instr==="care"?"ていねいに":"ふつう")+"／機嫌"+(st.morale>60?"😊":st.morale>30?"😐":"😠"),fn:()=>instructStaff(st.name,p)}));
+  if(!list.length)opts.push({label:"（この持ち場は空き。手伝いで入れる）",dis:true});
+  opts.push({label:"閉じる",fn:closeDlg});
+  openDlg("👨‍🍳",PNAME[p],"待ち皿 → 仕込み"+backlog("prep")+"・調理"+backlog("main")+"・提供"+backlog("serve")+"　どうする？",opts);
+}
+function instructStaff(name,p){
+  const st=S.staff.find(s=>s.name===name);if(!st)return;
+  openDlg("🗣",st.name,"「はい店長！どうしますか？」",
+   [
+    {label:"急いで！",sub:"スピード+30%（少し雑に）",fn:()=>{st.instr="hurry";toast(st.name+"「了解、飛ばします！」");closeDlg();}},
+    {label:"ていねいに",sub:"スピード-15%（絶品が生まれやすい）",fn:()=>{st.instr="care";toast(st.name+"「かしこまりました」");closeDlg();}},
+    {label:"ふつうのペースで",fn:()=>{st.instr=null;toast(st.name+"「わかりました」");closeDlg();}},
+    {label:"励ます（機嫌+8・1日1回）",fn:()=>{if(dayFlags["rest_"+st.name]===S.day){toast("さっき声をかけた");return;}dayFlags["rest_"+st.name]=S.day;st.morale=Math.min(100,st.morale+8);gainXp("talk",1);toast("💪 "+st.name+"の機嫌が上がった");closeDlg();}},
+    {label:"戻る",fn:()=>stationDialog(p)},
+   ]);
+}
+function updateCarry(ts){
+  if(S.inside&&kPost==="serve"){
+    carryDish.visible=true;
+    carryDish.position.set(player.position.x+Math.sin(player.rotation.y)*0.5,1.15,player.position.z+Math.cos(player.rotation.y)*0.5);
+  }else carryDish.visible=false;
 }
 // ---------------- 自宅 ----------------
 function dlgHome(){
@@ -969,7 +1614,7 @@ function dlgMina(){
         banner("🎀 ミナが看板娘になった！");closeDlg();
       }},
       {label:"従業員として雇う",sub:"腕前★★★★★・日給¥9,000",fn:()=>{
-        S.staff.push({name:"ミナ",skill:5,wage:9000,morale:90,quirk:"看板娘",mina:true});
+        S.staff.push({name:"ミナ",skill:5,wage:9000,morale:90,quirk:"看板娘",mina:true,instr:null});
         NPC.mina.m.position.set(4.5,0,14);
         banner("🎉 ミナが仲間になった！");closeDlg();
       }},
@@ -991,433 +1636,258 @@ function dlgBaa(){
 const INTERACTS=[
  {x:-32,z:-10.5,r:3.5,label:"🗣 おやじと話す（仕入れ）",fn:dlgOyaji},
  {x:-14,z:-10.5,r:3.5,label:"🗣 銀行員と話す（融資）",fn:dlgBank},
- {x:2,z:-10.5,r:3.5,label:"🗣 求人の相談（面接）",fn:dlgHw},
+ {x:2,z:-10.5,r:3.5,label:"🗣 求人・従業員の相談",fn:dlgHw},
  {x:18,z:-10.5,r:3.5,label:"🗣 広告の相談",fn:dlgAd},
- {x:34,z:-10.5,r:3.5,label:"🗣 不動産の相談（拡大）",fn:dlgRe},
+ {x:34,z:-10.5,r:3.5,label:"🗣 不動産の相談（2号店・拡大）",fn:dlgRe},
  {x:0,z:14,r:4,label:"🏮 店に入る",fn:dlgShop},
  {x:-38,z:17.5,r:3.5,label:"🏠 家に入る",fn:dlgHome},
  {x:0,z:-36,r:5,label:"📣 駅前で客引き（体力10）",fn:doTout},
+ {x:0,z:-46,r:4,label:"🗾 駅から全国マップ（移動）",fn:()=>openNationalMap("travel")},
  {x:38,z:22,r:2.5,label:"🪑 ベンチで休む",fn:benchRest},
  {x:33,z:26,r:2.5,label:"🏃 ジョギング（体力20）",fn:doJog},
  {x:6,z:14,r:3,label:"🗣 ばあちゃんと話す",fn:dlgBaa},
+ {x:-18,z:16,r:3.5,label:"🏢 空き物件・2号店の相談",fn:dlgRe},
  {x:-46,z:-10.5,r:3.5,label:"🗣 業務スーパー（全材料★1・激安）",fn:dlgGyomu},
  {x:-32,z:-32.5,r:3.5,label:"🗣 八百屋の青木（野菜・卵★3）",fn:dlgYaoya},
  {x:-44,z:-32.5,r:3.5,label:"🗣 肉屋のゴロー（鶏・豚★3）",fn:dlgButcher},
  {x:-20,z:-32.5,r:3.5,label:"🗣 漁師のウミ（鮮魚★3）",fn:dlgFish},
  {x:16,z:-32.5,r:3.5,label:"🗣 職人のムギ（酒・珈琲★3）",fn:dlgBrew},
  {x:28,z:-32.5,r:3.5,label:"🗣 米屋のコメジ（米★3）",fn:dlgRice},
- {x:204.5,z:200.8,r:2.6,label:"👨‍🍳 厨房コンロ（采配・編成・指導）",fn:dlgStove},
- {x:200,z:207.2,r:3.5,label:"🚪 店の外に出る",fn:exitShop},
 ];
-function exitShop(){S.inside=false;player.position.set(0,0,13);toast("🚪 外に出た");}
-// ============ 厨房チームビルディング（采配モード・PDF企画準拠） ============
-const POSN=["prep","main","serve"];
-const PNAME={prep:"🔪 仕込み・前処理",main:"🔥 メイン調理",serve:"🍽 接客・カウンター"};
-let K=null;
-function staffAt(p){const n=S.formation[p];return n?S.staff.find(s=>s.name===n):null;}
-function formKey(){return POSN.map(p=>S.formation[p]||"-").join("|");}
-function dlgStove(){
-  ensureMenu();
-  openDlg("👨‍🍳","厨房コンロ",
-   `習慣化Lv<b>${S.habit}</b>／10（同じ配置で営業を続けると上昇→ミス率減・単価UP）<br>絶品ストック：${S.cookQ}`,
-   [
-    {label:"厨房采配を開始（ピーク60秒）",cls:"go",sub:S.open?"チームを指揮してオーダーを捌け！":"開店中のみ（レジで開店しよう）",dis:!S.open,fn:startKitchen},
-    {label:"フォーメーション編成",sub:POSN.map(p=>PNAME[p].slice(2)+"："+(S.formation[p]||"空き")).join("／"),fn:formationModal},
-    {label:"調理指導（体力20・1日1回）",sub:"スタッフの腕前を+0.5（あなたの料理Lvで教える）",fn:teachStaff},
-    {label:"離れる",fn:closeDlg},
-   ]);
+function interiorInteracts(){
+  const list=[{x:200,z:208.2,r:2.4,label:"🚪 店の外に出る",fn:exitShop}];
+  for(const p of POSN)list.push({x:HELPPT[p][0],z:HELPPT[p][1],r:1.7,label:"👨‍🍳 "+PNAME[p].slice(2)+"（手伝う/指示）",fn:()=>stationDialog(p)});
+  return list;
 }
-function formationModal(){
-  closeDlg();
-  modal(`<h2>👥 フォーメーション編成</h2>
-  <p style="font-size:11px;color:#888">性格が配置で活きる：接客の天才→接客／研究熱心→メイン調理／早起き→昼に強い。<b>同じ配置を続けると習慣化Lvが育つ</b>（変えるとリセット気味）</p>`+
-   POSN.map(p=>`<div class="line"><span>${PNAME[p]}</span><b><button class="tag on" onclick="assignUI('${p}')">${S.formation[p]||"＋配置する"}</button></b></div>`).join("")+
-   `<button class="btn" onclick="closeModal()">決定</button>`);
-}
-function assignUI(p){
-  const used=POSN.map(q=>S.formation[q]);
-  const avail=S.staff.filter(s=>!used.includes(s.name));
-  modal(`<h2>${PNAME[p]} に配置</h2>`+
-   avail.map(s=>`<button class="opt" onclick="setPos('${p}','${s.name}')">${s.name} ★${s.skill}<small>${s.quirk}／機嫌${s.morale>60?"😊":s.morale>30?"😐":"😠"}</small></button>`).join("")+
-   `<button class="opt warn" onclick="setPos('${p}','')">空きにする（自分がカバー）</button>
-   <button class="btn ghost" onclick="formationModal()">戻る</button>`);
-}
-function setPos(p,name){S.formation[p]=name||null;save();formationModal();}
-function teachStaff(){
-  if(!once("teach")){toast("今日はもう指導した");return;}
-  if(!S.staff.length){toast("指導する従業員がいない");dayFlags["teach"]=0;return;}
-  if(!useStam(20)){dayFlags["teach"]=0;return;}
-  modal(`<h2>📖 調理指導（料理Lv${skillLv("cook")}）</h2>`+
-   S.staff.map((s,i)=>`<button class="opt" onclick="doTeach(${i})">${s.name} ★${s.skill}<small>${s.quirk}</small></button>`).join("")+
-   `<button class="btn ghost" onclick="closeModal()">やめる</button>`);
-}
-function doTeach(i){
-  const s=S.staff[i];
-  if(s.skill>=5){toast(s.name+"はもう完璧だ");return;}
-  s.skill=Math.min(5,s.skill+0.5);s.morale=Math.min(100,s.morale+5);gainXp("cook",1);
-  toast("📖 "+s.name+"の腕前が★"+s.skill+"に！");closeModal();save();
-}
-function startKitchen(){
-  closeDlg();
-  K={t:60,bars:{prep:0,main:0,serve:0},pb:0,sb:0,done:0,burnt:0,
-     boost:{prep:0,main:0,serve:0},cheer:{prep:0,main:0,serve:0},
-     stopped:{},anoms:[],aid:0,spawnT:0,help:null,last:performance.now()};
-  modal(`<h2 style="display:flex;justify-content:space-between">👨‍🍳 厨房采配 <span id="kt">60</span></h2>
-  <div style="font-size:11px;color:#888">提供 <b id="kdone">0</b>皿・絶品ストック <b id="kq">${S.cookQ}</b>／異常はタップで即対応！</div>
-  ${POSN.map(p=>{
-    const st=staffAt(p);
-    return `<div style="margin-top:10px">
-    <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700">
-      <span>${PNAME[p]} <span style="color:#888;font-weight:500">${st?st.name+"★"+st.skill+"("+st.quirk+")":"（空き）"}</span></span>
-      <span>
-        <button class="tag" onclick="kHelp('${p}')" id="kh-${p}">自分が入る</button>
-        <button class="tag on" onclick="kBoost('${p}')">⚡ブースト(体力8)</button>
-      </span>
-    </div>
-    <div style="height:12px;background:#eee;border-radius:6px;overflow:hidden;margin-top:4px">
-      <div id="kb-${p}" style="height:100%;width:0%;background:var(--accent2)"></div>
-    </div></div>`;}).join("")}
-  <div style="display:flex;gap:10px;font-size:11px;color:#888;margin-top:6px"><span>仕込み待ち：<b id="kpb">0</b></span><span>提供待ち：<b id="ksb">0</b></span></div>
-  <div id="kanoms" style="margin-top:8px"></div>
-  <button class="btn ghost" style="margin-top:10px" onclick="kEnd(true)">切り上げる</button>`);
-  requestAnimationFrame(kLoop);
-}
-function kSpeed(p){
-  if(!K)return 0;
-  if(K.stopped[p])return 0;
-  const st=staffAt(p);
-  let v=st?0.45+st.skill*0.2:0.25;
-  if(K.help===p)v+=0.55;
-  if(st&&st.quirk==="早起き"&&hourNow()<15)v*=1.3;
-  if(st&&st.quirk==="接客の天才"&&p==="serve")v*=1.25;
-  if(K.cheer[p]>0)v*=2;
-  if(K.boost[p]>0)v*=2;
-  return v;
-}
-function kLoop(ts){
-  if(!K)return;
-  if(!$("kb-prep")){K=null;return;}
-  const dt=Math.min(0.05,(ts-K.last)/1000);K.last=ts;
-  K.t-=dt;
-  for(const p of POSN){if(K.boost[p]>0)K.boost[p]-=dt;if(K.cheer[p]>0)K.cheer[p]-=dt;}
-  const LEN={prep:2.6,main:4,serve:3};
-  // 仕込み
-  K.bars.prep+=kSpeed("prep")*dt/LEN.prep;
-  if(K.bars.prep>=1){K.bars.prep=0;if(K.pb<3)K.pb++;}
-  // メイン（仕込み待ちが必要）
-  if(K.pb>0){K.bars.main+=kSpeed("main")*dt/LEN.main;
-    if(K.bars.main>=1){K.bars.main=0;K.pb--;if(K.sb<3)K.sb++;
-      const st=staffAt("main");
-      if(st&&st.quirk==="研究熱心"&&Math.random()<0.15){S.cookQ=Math.min(15,S.cookQ+1);toast("🔬 "+st.name+"が絶品を生み出した！");}
-    }}
-  // 接客（提供待ちが必要）
-  if(K.sb>0){K.bars.serve+=kSpeed("serve")*dt/LEN.serve;
-    if(K.bars.serve>=1){K.bars.serve=0;K.sb--;K.done++;S.cookQ=Math.min(15,S.cookQ+1);}}
-  // 異常発生
-  K.spawnT+=dt;
-  if(K.spawnT>4){K.spawnT=0;
-    const avgSk=POSN.reduce((a,p)=>{const s=staffAt(p);return a+(s?s.skill:0);},0)/3;
-    let pr=clamp(0.5-S.habit*0.035-avgSk*0.05+(avgQ()<1?0.15:0),0.08,0.6);
-    if(Math.random()<pr)kSpawnAnom();
-  }
-  // 異常TTL
-  for(let i=K.anoms.length-1;i>=0;i--){
-    const a=K.anoms[i];
-    if(a.ttl!==undefined){a.ttl-=dt;
-      if(a.ttl<=0){ // 焦げ発生
-        consumeStock(1);S.rep=clamp(S.rep-0.5,0,100);K.burnt++;K.bars.main=0;
-        K.anoms.splice(i,1);kRenderAnoms();toast("🔥 焦げた！食材廃棄＆評判ダウン");
-      }
-    }
-  }
-  // UI更新
-  for(const p of POSN){const el=$("kb-"+p);if(el)el.style.width=(K.bars[p]*100)+"%";}
-  const kt=$("kt");if(kt)kt.textContent=Math.ceil(K.t)+"秒";
-  const kd=$("kdone");if(kd)kd.textContent=K.done;
-  const kq=$("kq");if(kq)kq.textContent=S.cookQ;
-  const kpb=$("kpb");if(kpb)kpb.textContent=K.pb;
-  const ksb=$("ksb");if(ksb)ksb.textContent=K.sb;
-  if(K.t<=0){kEnd(false);return;}
-  requestAnimationFrame(kLoop);
-}
-function kSpawnAnom(){
-  const types=[
-   {k:"prepStop",pos:"prep",txt:"🧊 仕込みライン停止！",fix:"指示を出す"},
-   {k:"burn",pos:"main",txt:"🔥 焦げそう！！",fix:"火を弱める",ttl:3},
-   {k:"panic",pos:"serve",txt:"😵 接客がパニック！",fix:"交代する"},
-  ];
-  const moodys=POSN.filter(p=>{const s=staffAt(p);return s&&s.quirk==="気分屋";});
-  if(moodys.length&&Math.random()<0.35)types.push({k:"moody",pos:pick(moodys),txt:"😮‍💨 気分屋の士気が急落…",fix:"声をかける"});
-  const t=pick(types);
-  if(K.anoms.some(a=>a.pos===t.pos))return;
-  const a={id:++K.aid,...t};
-  if(t.k!=="burn")K.stopped[t.pos]=true;
-  K.anoms.push(a);kRenderAnoms();
-}
-function kRenderAnoms(){
-  const el=$("kanoms");if(!el)return;
-  el.innerHTML=K.anoms.map(a=>`<button class="opt warn" style="margin-bottom:6px" onclick="kFix(${a.id})">${a.txt}${a.ttl!==undefined?"（急げ！）":""}<small>👆 ${a.fix}</small></button>`).join("");
-}
-function kFix(id){
-  const i=K.anoms.findIndex(a=>a.id===id);if(i<0)return;
-  const a=K.anoms[i];K.anoms.splice(i,1);
-  K.stopped[a.pos]=false;
-  if(a.k==="moody"){K.cheer[a.pos]=8;toast("💪 声をかけたら大復活！速度2倍！");}
-  else if(a.k==="panic"){K.help="serve";const kh=$("kh-serve");toast("🤝 自分が接客に入った！");}
-  else toast("✅ 対応した！ライン復旧");
-  gainXp("talk",1);kRenderAnoms();
-}
-function kHelp(p){
-  K.help=K.help===p?null:p;
-  POSN.forEach(q=>{const el=$("kh-"+q);if(el)el.className="tag"+(K.help===q?" on":"");});
-  toast(K.help?PNAME[p].slice(2)+"に入った！":"司令塔に戻った");
-}
-function kBoost(p){
-  if(!useStam(8))return;
-  K.boost[p]=10;toast("⚡ "+PNAME[p].slice(2)+"を劇的ブースト！（10秒）");renderHud();
-}
-function kEnd(early){
-  if(!K)return;
-  const done=K.done,burnt=K.burnt,target=8+S.habit;
-  const grade=done>=target*1.3?"S":done>=target?"A":done>=target*0.6?"B":"C";
-  S.rep=clamp(S.rep+done*0.15-burnt*0.3,0,100);
-  S.formKeyT=formKey();
-  K=null;
-  modal(`<h2>📊 采配リザルト：${grade}評価</h2>
-  <div class="line"><span>完璧な提供</span><b class="plus">${done}皿（目標${target}）</b></div>
-  <div class="line"><span>焦げ・ロス</span><b class="${burnt?"minus":""}">${burnt}回</b></div>
-  <div class="line"><span>絶品ストック</span><b>${S.cookQ}（次の客から単価+25%）</b></div>
-  <div class="line"><span>習慣化</span><b>この配置で営業を続けるとLv${Math.min(10,S.habit+1)}へ</b></div>
-  ${grade==="S"?'<p style="font-size:12px;color:var(--accent);font-weight:700;margin-top:8px">💯 顧客目線の100%を叩き出した！</p>':""}
-  <button class="btn acc" onclick="closeModal()">営業に戻る</button>`);
-  gainXp("cook",2);save();
-}
-function menuModal(){
-  closeDlg();ensureMenu();
-  modal(`<h2>${conC().e} ${conC().n}のメニュー表（${S.menu.length}品）</h2>`+
-   S.menu.map((d,i)=>`<div class="line"><span>${d.n} <span style="font-size:10px;color:#888">${d.rec.map(t=>ING[t].e).join("")}</span></span>
-   <b>${fmt(dishPrice(i))} <button class="tag" onclick="renameDish(${i})">✏️</button></b></div>`).join("")+
-   `<p style="font-size:11px;color:#888;margin-top:8px">絵文字＝必要材料（切らすとその料理は出せない）。✏️で改名。メニュー研究で無限に増える。絶品ストック：${S.cookQ}</p>
-   <button class="btn" onclick="closeModal()">閉じる</button>`);
-}
-function renameDish(i){
-  const n=prompt("新しいメニュー名（12文字まで）",S.menu[i].n);
-  if(n&&n.trim()){S.menu[i].n=n.trim().slice(0,12);save();}
-  menuModal();
-}
-function minaInteract(){
-  const p=NPC.mina.m.position;
-  return {x:p.x,z:p.z,r:3,label:"🗣 ミナと話す",fn:dlgMina};
-}
+function minaInteract(){const p=NPC.mina.m.position;return {x:p.x,z:p.z,r:3,label:"🗣 ミナと話す",fn:dlgMina};}
 let curAct=null,pedCd=0;
 function dlgPed(){
   if(pedCd>0){toast("さっき話したばかり");return;}
   pedCd=10;
   const r=Math.random();
   const common=["いい天気だねえ","この辺で美味い店？…あんたの店？ふーん","仕事だるいわ〜","さっき猫がいたよ🐈","最近この通り、にぎやかになったね"];
-  const local={tokyo:["家賃高すぎない？この町","タワー見えるの、いいでしょ","人が多くて疲れるよ"],osaka:["もうかりまっか？","たこ焼きは正義やで","商売は愛嬌や、覚えとき"],kyoto:["観光の方どすか？","神社の紅葉、見頃どすえ","一見さんも大事にしなはれ"],fukuoka:["夜の屋台通り、最高やけん","ラーメンは硬めに限る","博多の夜は長かよ〜"],sapporo:["雪かき手伝って〜","寒いから温かいもの食べたいねえ","雪まつり楽しみだべ"],okinawa:["なんくるないさ〜","海きれいでしょ？","ゆっくりやるのが一番さ〜"]}[S.city]||[];
-  if(r<0.2){ // うわさ（明日の相場ヒント）
+  const local={tokyo:["家賃高すぎない？この町","タワー見えるの、いいでしょ","人が多くて疲れるよ"],osaka:["もうかりまっか？","たこ焼きは正義やで","商売は愛嬌や、覚えとき"],kyoto:["観光の方どすか？","神社の紅葉、見頃どすえ","一見さんも大事にしなはれ"],fukuoka:["夜の屋台通り、最高やけん","ラーメンは硬めに限る","博多の夜は長かよ〜"],hokkaido:["雪かき手伝って〜","寒いから温かいもの食べたいねえ","海の幸は北海道が一番だべ"],okinawa:["なんくるないさ〜","海きれいでしょ？","ゆっくりやるのが一番さ〜"]}[curPrefKey()]||[];
+  if(r<0.2){
     const up=(S.nextMkt||1)>1.05,down=(S.nextMkt||1)<0.95;
     openDlg("🚶","通行人","「そういえば…明日は市場の相場が"+(up?"<b>上がる</b>":down?"<b>下がる</b>":"あまり動かない")+"らしいよ。仕入れの参考にね」",[{label:"いい情報！",fn:closeDlg}]);
-  }else if(r<0.4){ // 宣伝チャンス
+  }else if(r<0.4){
     gainXp("talk",1);S.rep=clamp(S.rep+0.5,0,100);
-    openDlg("🚶","通行人","「へえ、"+(S.concept?conC().n:"お店")+"やってるの？今度行ってみるよ」<br>（店の宣伝ができた！評判+0.5）",[{label:"待ってます！",fn:closeDlg}]);
+    openDlg("🚶","通行人","「へえ、"+(curConcept()?conC().n:"お店")+"やってるの？今度行ってみるよ」<br>（店の宣伝ができた！評判+0.5）",[{label:"待ってます！",fn:closeDlg}]);
   }else{
     openDlg("🚶","通行人","「"+pick(local.concat(common))+"」",[{label:"じゃあね",fn:closeDlg}]);
   }
 }
 function pedInteract(){
   let best=null,bd=1e9;
-  peds.forEach(p=>{
-    const d=Math.hypot(player.position.x-p.m.position.x,player.position.z-p.m.position.z);
-    if(d<2.4&&d<bd){bd=d;best=p;}
-  });
+  peds.forEach(p=>{const d=Math.hypot(player.position.x-p.m.position.x,player.position.z-p.m.position.z);if(d<2.4&&d<bd){bd=d;best=p;}});
   return best?{x:best.m.position.x,z:best.m.position.z,r:2.4,label:"🗣 通行人と話す",fn:dlgPed}:null;
 }
 function checkInteract(){
-  if(dlgOn){$("actBtn").style.display="none";return;}
+  const b=$("actBtn"),hb=$("helpBtn");
+  if(dlgOn){b.style.display="none";hb.style.display="none";return;}
+  let list;
+  if(S.inside)list=(S.activeStore===2?interior2Interacts():interiorInteracts());
+  else{const pd=pedInteract();list=INTERACTS.concat([minaInteract()],pd?[pd]:[]);}
   let best=null,bd=1e9;
-  const pd=pedInteract();
-  const list=INTERACTS.concat([minaInteract()],pd?[pd]:[]);
-  for(const it of list){
-    const d=Math.hypot(player.position.x-it.x,player.position.z-it.z);
-    if(d<it.r&&d<bd){bd=d;best=it;}
-  }
+  for(const it of list){const d=Math.hypot(player.position.x-it.x,player.position.z-it.z);if(d<it.r&&d<bd){bd=d;best=it;}}
   curAct=best;
-  const b=$("actBtn");
-  if(best){b.style.display="block";b.textContent=best.label;}
-  else b.style.display="none";
+  if(best){b.style.display="block";b.textContent=best.label;}else b.style.display="none";
+  if(S.inside&&S.activeStore===1){const p=nearestStation();
+    if(p){hb.style.display="block";hb.textContent=kPost===p?"✋ やめる":"🤝 手伝う";hb._p=p;}
+    else hb.style.display="none";
+  }else hb.style.display="none";
 }
 $("actBtn").onclick=()=>{if(curAct)curAct.fn();};
+$("helpBtn").onclick=()=>{const p=$("helpBtn")._p;if(p)toggleHelp(p);};
 // ---------------- 売上シミュレーション ----------------
 const fx=[];
-function moneyFx(txt,x,z){
-  const s=makeLabel(txt,0.7,"rgba(47,111,94,.9)");
-  s.position.set(x,4,z);scene.add(s);
-  fx.push({s,age:0});
-}
-function workers(){
-  const nearShop=(S.inside||Math.hypot(player.position.x,player.position.z-14)<10)?1:0;
-  return S.staff.length+nearShop;
-}
+function moneyFx(txt,x,z){const s=makeLabel(txt,0.7,"rgba(47,111,94,.9)");s.position.set(x,4,z);scene.add(s);fx.push({s,age:0});}
+function workers(){const nearShop=(S.inside||Math.hypot(player.position.x,player.position.z-14)<10)?1:0;return S.staff.length+nearShop;}
+function assignedWorkers(){return POSN.reduce((a,p)=>a+staffListAt(p).length,0)+((kPost&&S.inside)?1:0);}
 function demandPerMin(){
+  if(S.activeStore!==1)return 0;
   const h=hourNow(),cn=conC(),ct=cityC();
   let base=(h>=11&&h<14)?3.2:(h>=18&&h<22)?3.8:(h>=6&&h<23)?0.8:0.15;
   base*=ct.traffic*(h<17?cn.day:cn.night*ct.nightF);
   const fp=fairPrice();
   const priceF=clamp(Math.exp(-(S.price-fp)/(fp*0.8*(cn.priceTol||1))),0.1,1.8);
   const intF=1+(S.interiorLv-1)*0.05;
-  base*=intF*(S.inside&&S.open?1.1:1); // 店主が厨房に立つと出来たてボーナス
+  base*=intF*(S.inside&&S.open?1.1:1);
   const repF=0.3+S.rep/60;
   const adF=1+(S.ads.flyer>0?0.2:0)+(S.ads.sns>0?0.35:0)+(S.ads.tv>0?0.8:0);
   const toutF=S.buffTalk>0?1.8:1;
   const brandF=1+S.brand/100;
   const rivalF=S.rivalSale>0?0.6:0.85;
   const minaF=S.minaKanban?1.15:1;
-  return base*priceF*repF*adF*toutF*brandF*rivalF*minaF;
+  const buzzF=S.buzzDays>0?S.buzzMult:1;
+  return base*priceF*repF*adF*toutF*brandF*rivalF*minaF*buzzF;
 }
-let spawnAcc=0;
-function salesTick(dt){ // dt=実秒
+let spawnAcc=0,stockWarnT=0;
+function salesTick(dt){
   if(S.buffTalk>0)S.buffTalk-=dt;
   if(toutCd>0)toutCd-=dt;
   if(pedCd>0)pedCd-=dt;
-  if(!S.open)return;
+  if(S.activeStore!==1||!S.open)return;
   if(workers()===0){S.open=false;banner("⚠️ 人手ゼロで店が回らない！自動閉店（評判-2）");S.rep=clamp(S.rep-2,0,100);renderHud();return;}
-  spawnAcc+=demandPerMin()/60*dt*2; // 1実秒=2ゲーム分
-  while(spawnAcc>=1){spawnAcc--;if(custs.length<14)spawnCust();}
+  stockWarnT+=dt;
+  if(stockWarnT>3){stockWarnT=0;checkStockAfter();
+    if(assignedWorkers()===0)notifyStock("👥 持ち場に誰も配置されていない！編成するか厨房で手伝おう","noassign",true);}
+  spawnAcc+=demandPerMin()/60*dt*2;
+  while(spawnAcc>=1){spawnAcc--;if(custs.length<28)spawnCust();}
 }
-function serveCust(c){
-  if(!S.open){c.phase="angry";c.t=0;return;}
-  ensureMenu();
-  const cands=S.menu.map((d,i)=>({d,i})).filter(x=>x.d.rec.every(t=>stockTotal(t)>=1));
-  if(!cands.length){
-    c.phase="angry";c.t=0;
-    S.lost++;S.rep=clamp(S.rep-0.3,0,100);log("😠 作れる料理がなく客が帰った…（材料を確認）");
-    return;
-  }
-  const {d,i}=pick(cands);
-  let qs=0;d.rec.forEach(t=>{qs+=consumeType(t,1);});
-  S.qsum+=qs/d.rec.length;
-  let pay=Math.round(dishPrice(i)*SEG3[c.seg].mult*(1+S.habit*0.01));
-  let mark="";
-  if(S.cookQ>0){S.cookQ--;pay=Math.round(pay*1.25);S.rep=clamp(S.rep+0.05,0,100);mark="✨";}
-  S.money+=pay;S.sales+=pay;S.custs++;
-  moneyFx(mark+d.n+" +"+fmt(pay),R(-3,3),R(12,16));
-  c.phase="eat";c.t=R(4,8);c.m.visible=false;
+function resetService(){
+  custs.forEach(c=>scene.remove(c.m));custs=[];queue=[];
+  for(let i=0;i<MAXSEATS;i++){seats[i]=null;seatMesh[i].visible=false;}
+  tickets=[];kPost=null;spawnAcc=0;
 }
 // ---------------- 睡眠・決算・倒産 ----------------
 function doSleep(){
   closeDlg();
-  const crossed=hourNow()>=6; // 6時以降に寝る＝翌日へ
-  if(crossed){settle();}
+  if(S.activeStore!==1){S.activeStore=1;applyTheme();repaintShop();player.position.set(-38,0,17.5);}
+  const crossed=hourNow()>=6;
+  if(crossed)settle();
   S.tmin=360;S.stam=S.maxStam;S.hunger=clamp(S.hunger-15,5,100);S.sleptDay=S.day;
   save();
 }
 function settle(){
+  if(S.custs>0)S.formKeyT=formKey();
   S.day++;
-  const rent=3000+cityC().rent; // 自宅3,000+店（都市による）
+  const homePref=PREF[S.city]||PREF.tokyo;
+  const rent=3000+homePref.rent;
   const util=S.custs>0||S.open?2000:0;
-  const wages=S.staff.reduce((a,s)=>a+s.wage,0)+(S.st2.mgr?S.st2.mgr.wage:0)+(S.areaMgr?S.areaMgr.wage:0);
+  const wages=S.staff.reduce((a,s)=>a+s.wage,0)+(S.areaMgr?S.areaMgr.wage:0);
   const interest=Math.round(S.loans*0.01);
   // 廃棄
   let waste=0;
   S.stock=S.stock.filter(s=>{if(S.day-s.day>=2){waste+=s.n;return false;}return true;});
   const wasteCost=waste*180;
-  // 2号店
+  // 2号店（店長運営＋指示）
   let st2pl=0;
   if(S.st2.owned){
-    if(S.st2.mgr)st2pl=Math.round((S.st2.mgr.skill*9000+S.rep*250)*R(0.5,1.4)*(1+S.habit*0.02)-16000);
-    else st2pl=-8000;
+    if(S.st2.mgr){
+      const p2=PREF[S.st2.pref];const dir=S.st2.dir||{price:"std",focus:"cust",ad:0};
+      let b=S.st2.mgr.skill*9000+S.rep*160+S.st2.rep*120;
+      b*=p2.traffic*(0.9+p2.tourist*0.1);
+      if(dir.price==="low")b*=1.15;else if(dir.price==="high")b*=0.95;
+      if(dir.focus==="cust")b*=1.08;else if(dir.focus==="quality")b*=1.03;
+      b+=S.st2.staff.reduce((a,s)=>a+s.skill*2500,0);
+      b*=(1+(S.st2.boost||0));
+      const adCost=dir.ad>0?dir.ad*10000:0;
+      const wages2=S.st2.mgr.wage+S.st2.staff.reduce((a,s)=>a+s.wage,0);
+      const ru=p2.rent+5000;
+      st2pl=Math.round(b*R(0.7,1.3)-wages2-ru-adCost);
+      S.st2.rep=clamp(S.st2.rep+(dir.focus==="quality"?1.2:0.4)+(S.st2.mgr.skill>=4?0.6:0)-0.3,0,100);
+      if(dir.ad>0)S.st2.dir.ad=Math.max(0,dir.ad-1);
+    }else st2pl=-9000;
+    S.st2.boost=0;
   }
   // FCロイヤリティ
   let roy=0;
   if(S.fr>0){
     roy=Math.round(S.fr*R(4000,14000)*(1+S.brand/100)*(1+S.habit*0.02));
     if(S.areaMgr)roy=Math.round(roy*(1+S.areaMgr.skill*0.06));
-    if(Math.random()<(S.areaMgr?0.02:0.06)){S.rep=clamp(S.rep-4,0,100);log("📰 FC店で接客トラブル！本部の評判に傷が…（評判-4）"+(S.areaMgr?"":"（エリアMgrがいれば防げたかも）"));}
+    if(Math.random()<(S.areaMgr?0.02:0.06)){S.rep=clamp(S.rep-4,0,100);log("📰 FC店で接客トラブル！本部の評判に傷が…（評判-4）");}
   }
   S.lastRoy=roy;S.st2.lastPl=st2pl;
-  const income=roy+Math.max(0,st2pl);
-  const outgo=rent+util+wages+interest+Math.max(0,-st2pl);
   S.money+=roy+st2pl-rent-util-wages-interest;
   // 従業員モラール
   S.staff=S.staff.filter(st=>{
     st.morale+=(st.wage>=st.skill*2800?4:-9);
-    if(st.morale<30&&Math.random()<0.5){log("💨 "+st.name+"が辞めてしまった…（安月給に不満）");return false;}
+    if(st.morale<28&&Math.random()<0.5){log("💨 "+st.name+"が辞めてしまった…（不満）");POSN.forEach(p=>{S.formation[p]=(S.formation[p]||[]).filter(n=>n!==st.name);});return false;}
     return true;
   });
   // 評判ドリフト
   if(S.custs>0&&S.lost>S.custs*0.3)S.rep=clamp(S.rep-2,0,100);
   if(S.custs>=15&&S.quality>=3)S.rep=clamp(S.rep+1.5,0,100);
   if(S.custs===0)S.rep=clamp(S.rep-0.5,0,100);
-  // 食材品質の評判
   if(S.custs>=8){
     const qavg=S.qsum/S.custs;
     if(qavg>=1.6){S.rep=clamp(S.rep+1.5,0,100);log("🥬 高級食材が話題に（評判+）");}
     else if(qavg<=0.4){S.rep=clamp(S.rep-1.5,0,100);log("🧊 「安い食材使ってるらしい」と噂が…（評判-）");}
   }
   S.qsum=0;
-  S.brand=clamp(Math.max(0,S.rep-50)*0.6+S.fr*4,0,100);
+  // 改善9: バズ判定
+  if(S.buzzDays>0){
+    S.buzzDays--;
+    if(S.custs>0&&S.lost>S.custs*0.5){S.rep=clamp(S.rep-3,0,100);log("📉 バズ中に捌けず“期待外れ”の声が…（評判-3）");}
+    if(S.buzzDays<=0){S.buzzMult=1;log("🔥 バズが落ち着いた");}
+  }else{
+    let chance=0.02+S.brand*0.002;
+    if(S.ads.sns>0)chance+=0.10;
+    if(S.quality>=4)chance+=0.05;
+    if(S.custs>=20&&S.lost<=S.custs*0.15)chance+=0.06;
+    if(S.rep>=70)chance+=0.05;
+    if(Math.random()<clamp(chance,0,0.55)){
+      S.buzzDays=RI(2,3);S.buzzMult=R(2.0,2.8);
+      S.rep=clamp(S.rep+3,0,100);S.brand=clamp(S.brand+4,0,100);
+      S.buzzKind=pick(["SNSでバズった","TV取材が来た","有名インフルエンサー来店","行列が行列を呼んだ"]);
+      banner("🔥 【"+S.buzzKind+"】明日から"+S.buzzDays+"日間、客が殺到！席と人手の準備を！");
+      log("🔥 店がバズった（"+S.buzzKind+"）！");
+    }
+  }
+  S.brand=clamp(Math.max(0,S.rep-50)*0.6+S.fr*4+(S.st2.owned?3:0),0,100);
   // 広告・相場・ライバル
   for(const k in S.ads)if(S.ads[k]>0)S.ads[k]--;
   S.mktRate=S.nextMkt||R(0.8,1.3);S.nextMkt=R(0.8,1.3);hagDisc=0;
-  // 習慣化Lv（同じフォーメーションで采配を続けると定着）
-  if(S.formKeyT&&S.formKeyT===S.formKeyY){S.habit=Math.min(10,S.habit+1);log("🤝 チームに習慣が定着してきた（習慣化Lv"+S.habit+"）");}
-  else if(S.formKeyY&&S.formKeyT!==S.formKeyY){S.habit=Math.max(0,S.habit-1);}
+  // 習慣化Lv
+  if(S.formKeyT&&S.formKeyT===S.formKeyY)S.habit=Math.min(10,S.habit+1);
+  else if(S.formKeyY&&S.formKeyT&&S.formKeyT!==S.formKeyY)S.habit=Math.max(0,S.habit-1);
   S.formKeyY=S.formKeyT;S.formKeyT="";
   S.rivalSale=Math.random()<0.2?1:0;
   if(S.rivalSale)log("⚔️ ライバル亭が今日はセールをやるらしい…");
+  // 仕入れ実績を記録（改善2）
+  for(const t of ALLT){const h=S.useHist[t]||[];h.push(S.useToday[t]||0);if(h.length>3)h.shift();S.useHist[t]=h;}
+  S.useToday={};
   // サマリー
-  const net=S.sales+roy+st2pl-rent-util-wages-interest-0;
+  const net=S.sales+roy+st2pl-rent-util-wages-interest;
   modal(`<h2>📒 ${S.day-1}日目の決算</h2>
-   <div class="line"><span>売上（${S.custs}人来店）</span><b class="plus">+${fmt(S.sales)}</b></div>
+   <div class="line"><span>本店 売上（${S.custs}人来店）</span><b class="plus">+${fmt(S.sales)}</b></div>
    ${roy>0?`<div class="line"><span>FCロイヤリティ（${S.fr}店）</span><b class="plus">+${fmt(roy)}</b></div>`:""}
-   ${S.st2.owned?`<div class="line"><span>2号店 損益</span><b class="${st2pl>=0?"plus":"minus"}">${st2pl>=0?"+":""}${fmt(st2pl)}</b></div>`:""}
-   <div class="line"><span>家賃（店＋自宅）</span><b class="minus">-${fmt(rent)}</b></div>
+   ${S.st2.owned?`<div class="line"><span>2号店 損益（${PREF[S.st2.pref].short}）</span><b class="${st2pl>=0?"plus":"minus"}">${st2pl>=0?"+":""}${fmt(st2pl)}</b></div>`:""}
+   <div class="line"><span>家賃（本店＋自宅）</span><b class="minus">-${fmt(rent)}</b></div>
    <div class="line"><span>水道光熱費</span><b class="minus">-${fmt(util)}</b></div>
-   <div class="line"><span>人件費</span><b class="minus">-${fmt(wages)}</b></div>
+   <div class="line"><span>人件費（本店）</span><b class="minus">-${fmt(wages)}</b></div>
    ${interest>0?`<div class="line"><span>借金利息</span><b class="minus">-${fmt(interest)}</b></div>`:""}
-   ${waste>0?`<div class="line"><span>⚠️ 食材廃棄 ${waste}個（仕入損）</span><b class="minus">${fmt(-wasteCost)}相当</b></div>`:""}
-   ${S.lost>0?`<div class="line"><span>😠 品切れで逃した客</span><b class="minus">${S.lost}人</b></div>`:""}
+   ${waste>0?`<div class="line"><span>⚠️ 食材廃棄 ${waste}個</span><b class="minus">${fmt(-wasteCost)}相当</b></div>`:""}
+   ${S.lost>0?`<div class="line"><span>😠 満席・品切れで逃した客</span><b class="minus">${S.lost}人</b></div>`:""}
    <div class="line" style="border-bottom:2px solid #333"><span><b>収支</b></span><b class="${net>=0?"plus":"minus"}">${net>=0?"+":""}${fmt(net)}</b></div>
    <div class="line"><span>現在の所持金</span><b class="${S.money>=0?"":"minus"}">${fmt(S.money)}</b></div>
+   ${S.buzzDays>0?'<p style="font-size:12px;color:var(--accent);font-weight:700;margin-top:6px">🔥 バズ継続中！残'+S.buzzDays+'日</p>':""}
    <button class="btn acc" onclick="closeModal()">${S.day}日目スタート</button>`);
-  // 破産判定
-  if(S.money<0){
-    S.negDays++;
-    if(S.negDays>=2){gameOver();return;}
-    banner("🚨 資金がマイナス！明日も赤字なら倒産！！");
-  }else S.negDays=0;
+  if(S.money<0){S.negDays++;if(S.negDays>=2){gameOver();return;}banner("🚨 資金がマイナス！明日も赤字なら倒産！！");}
+  else S.negDays=0;
   S.open=false;S.sales=0;S.custs=0;S.lost=0;
-  custs.forEach(c=>scene.remove(c.m));custs.length=0;
+  stockWarned={};resetService();
   renderHud();save();
 }
 function gameOver(){
   S.gameOver=true;
   $("overTxt").innerHTML=`${S.day}日目、資金繰りが尽きた。<br>店の看板が下ろされ、町に夕日が沈む——。<br><br>通算：${S.day}日間営業／最終評判 ${Math.round(S.rep)}／FC ${S.fr}店舗<br><br>でも、腕は残っている。（スキル・体力上限は引き継ぎ）`;
-  $("over").classList.add("on");
-  save();
+  $("over").classList.add("on");save();
 }
 function restartGame(){
   const keep={xp:S.xp,maxStam:S.maxStam,restarts:S.restarts+1};
   S=Object.assign(DEF(),keep);
-  dayFlags={};custs.forEach(c=>scene.remove(c.m));custs.length=0;
+  dayFlags={};resetService();
   NPC.mina.m.position.set(36,0,20);player.position.set(0,0,12);
   $("over").classList.remove("on");
   banner("🌅 新しい町で再出発。今度こそ名店に！");
-  renderHud();save();citySelect();
+  renderHud();save();openNationalMap("start");
 }
 // ---------------- メニューパネル ----------------
 $("menuBtn").onclick=()=>{
   const stf=S.staff.map(st=>`<div class="line"><span>${st.mina?"🎀":"👤"} ${st.name} ★${st.skill}（機嫌${st.morale>60?"😊":st.morale>30?"😐":"😠"}）</span><b>日給${fmt(st.wage)}</b></div>`).join("")||'<div class="line"><span>従業員なし（ワンオペ）</span><b>—</b></div>';
   modal(`<h2>📋 経営メニュー</h2>
+  <div class="line"><span>${prefC().e} ${prefC().short}／${S.concept?conC().n:"—"}${S.activeStore===2?"（2号店に滞在中）":""}</span><b></b></div>
   <div class="line"><span>単価 ${fmt(S.price)}／品質Lv${S.quality}（適正${fmt(fairPrice())}）</span><b></b></div>
-  <div class="line"><span>在庫 ${stockTotal()}個／評判 ${Math.round(S.rep)}／ブランド ${Math.round(S.brand)}</span><b></b></div>
+  <div class="line"><span>在庫 ${stockTotal()}個／席 ${S.seats}／評判 ${Math.round(S.rep)}／ブランド ${Math.round(S.brand)}</span><b></b></div>
+  ${S.buzzDays>0?`<div class="line"><span>🔥 バズ中（${S.buzzKind}）</span><b class="plus">残${S.buzzDays}日・集客×${S.buzzMult.toFixed(1)}</b></div>`:""}
   <div class="line"><span>広告</span><b>${S.ads.flyer>0?"チラシ"+S.ads.flyer+"日 ":""}${S.ads.sns>0?"SNS"+S.ads.sns+"日 ":""}${S.ads.tv>0?"TV"+S.ads.tv+"日":""}${S.ads.flyer+S.ads.sns+S.ads.tv===0?"なし":""}</b></div>
   <div class="line"><span>借入</span><b class="${S.loans>0?"minus":""}">${fmt(S.loans)}</b></div>
-  <div class="line"><span>2号店</span><b>${S.st2.owned?(S.st2.mgr?"店長:"+S.st2.mgr.name:"店長不在！"):"未購入"}</b></div>
+  <div class="line"><span>2号店</span><b>${S.st2.owned?(PREF[S.st2.pref].short+"・"+(S.st2.mgr?"店長"+S.st2.mgr.name:"店長不在！")):"未購入"}</b></div>
   <div class="line"><span>フランチャイズ</span><b>${S.fr}店舗</b></div>
   <h2 style="margin-top:14px">👥 従業員</h2>${stf}
+  ${S.staff.length?'<button class="btn ghost" onclick="closeModal();staffManageModal()">従業員を管理（昇給・相談・解雇）</button>':""}
   <h2 style="margin-top:14px">🧑 ステータス</h2>
   <div class="line"><span>交渉Lv${skillLv("nego")}・話術Lv${skillLv("talk")}・料理Lv${skillLv("cook")}</span><b></b></div>
   <div class="line"><span>体力上限 ${S.maxStam}／再挑戦 ${S.restarts}回</span><b></b></div>
@@ -1429,14 +1899,16 @@ $("phoneBtn").onclick=phoneUI;
 function phoneUI(){
   const minaOK=S.rels.mina>0||S.minaKanban||S.staff.some(s=>s.mina);
   modal(`<h2>📱 スマホ</h2>
-  <p style="font-size:11px;color:#888">電話注文は配達料<b>¥1,500</b>。値切り・世間話・面接は会いに行かないとできない。</p>
-  <h2 style="font-size:14px;margin-top:10px">📦 材料の電話注文（10個ずつ・★は品質）</h2>
+  <p style="font-size:11px;color:#888">電話注文は配達料<b>¥1,500</b>。<b>推奨</b>は直近の消費から自動計算（★2で発注）。</p>
+  <h2 style="font-size:14px;margin-top:10px">📦 材料の電話注文（★は品質）</h2>
   ${ALLT.map(t=>{
     const sp=Object.keys(SHOPS).find(k=>SHOPS[k].tier===2&&SHOPS[k].types.includes(t));
+    const rec=recommendQty(t);
     return `<div class="line"><span>${ING[t].e} ${ING[t].n}（在庫${stockTotal(t)}）</span><b>
-    <button class="tag" onclick="phoneBuyT('${t}',0)">★1 ${fmt(ingUnit("gyomu",t)*10)}</button>
-    <button class="tag" onclick="phoneBuyT('${t}',1)">★2 ${fmt(ingUnit("oyaji",t)*10)}</button>
-    <button class="tag" onclick="phoneBuyT('${t}',2)">★3 ${fmt(ingUnit(sp,t)*10)}</button></b></div>`;}).join("")}
+    <button class="tag" onclick="phoneBuyT('${t}',0,10)">★1×10</button>
+    <button class="tag" onclick="phoneBuyT('${t}',1,10)">★2×10</button>
+    <button class="tag" onclick="phoneBuyT('${t}',2,10)">★3×10</button>
+    ${rec>0?`<button class="tag on" onclick="phoneBuyT('${t}',1,${rec})">推奨★2×${rec}</button>`:""}</b></div>`;}).join("")}
   <h2 style="font-size:14px;margin-top:12px">🏦 銀行（電話バンキング）</h2>
   <div class="line"><span>借入 ${fmt(S.loans)}／日利1%</span><b>
     <button class="tag" onclick="phoneLoan()">10万借りる</button>
@@ -1449,24 +1921,13 @@ function phoneUI(){
   <div class="line"><span>🎀 ミナ</span><b><button class="tag" onclick="phoneChat()">メッセージ</button></b></div>`:""}
   <button class="btn" onclick="closeModal()">閉じる</button>`);
 }
-function phoneBuyT(t,tier){
+function phoneBuyT(t,tier,q){
   const shop=tier===0?"gyomu":tier===1?"oyaji":Object.keys(SHOPS).find(k=>SHOPS[k].tier===2&&SHOPS[k].types.includes(t));
-  if(buyIng(shop,t,10,1500))phoneUI();
+  if(buyIng(shop,t,q,1500))phoneUI();
 }
-function phoneLoan(){
-  if(S.loans>=1000000){toast("融資上限です");return;}
-  S.loans+=100000;S.money+=100000;log("💴 電話で10万円を借入");renderHud();phoneUI();
-}
-function phoneRepay(){
-  if(S.loans<=0){toast("借金はない");return;}
-  const p=Math.min(100000,S.loans);
-  if(S.money<p){toast("返済資金が足りない");return;}
-  S.money-=p;S.loans-=p;log("💴 電話で"+fmt(p)+"を返済");renderHud();phoneUI();
-}
-function phoneAd(k,c,d){
-  if(S.money<c){toast("💸 お金が足りない");return;}
-  S.money-=c;S.ads[k]=d;log("📣 電話で広告を発注");renderHud();phoneUI();
-}
+function phoneLoan(){if(S.loans>=1000000){toast("融資上限です");return;}S.loans+=100000;S.money+=100000;log("💴 電話で10万円を借入");renderHud();phoneUI();}
+function phoneRepay(){if(S.loans<=0){toast("借金はない");return;}const p=Math.min(100000,S.loans);if(S.money<p){toast("返済資金が足りない");return;}S.money-=p;S.loans-=p;log("💴 電話で"+fmt(p)+"を返済");renderHud();phoneUI();}
+function phoneAd(k,c,d){if(S.money<c){toast("💸 お金が足りない");return;}S.money-=c;S.ads[k]=d;log("📣 電話で広告を発注");renderHud();phoneUI();}
 function phoneChat(){
   const lines=S.minaKanban||S.staff.some(s=>s.mina)
    ?["今日もお店がんばりましょうね！🎀","さっきお客さんに褒められちゃいました♪","店長、ちゃんとご飯食べてます？","新メニュー、わたしも味見したいです！"]
@@ -1475,35 +1936,81 @@ function phoneChat(){
   <div style="background:#f0f7f4;border-radius:12px;padding:12px;font-size:13px;margin:8px 0">「${pick(lines)}」</div>
   <button class="btn" onclick="phoneUI()">戻る</button>`);
 }
-// ---------------- 全国出店・コンセプト選択 ----------------
-function citySelect(){
-  modal(`<h2>🗾 全国出店マップ</h2>
-  <p style="font-size:12px;color:#666;margin-bottom:8px">日本のどこで人生を始める？（家賃・人通り・客層が変わる）</p>`+
-   Object.keys(CITIES).map(k=>{const c=CITIES[k];
-    return `<button class="opt" onclick="chooseCity('${k}')">${c.e} ${c.n}<small>家賃 日${fmt(c.rent+3000)}・人通り${Math.round(c.traffic*100)}%・${c.desc}</small></button>`;}).join(""));
+// ================= 改善7: 2号店（入店・店長運営・指示） =================
+function dlgShop2(){
+  const st2=S.st2;
+  if(!st2.owned){toast("2号店はまだありません（不動産で出店）");return;}
+  openDlg("🏢","2号店（"+PREF[st2.pref].short+"）",
+   `${CONCEPTS[st2.concept].e} ${CONCEPTS[st2.concept].n}／店長：${st2.mgr?st2.mgr.name+" ★"+st2.mgr.skill:"⚠️不在（赤字）"}<br>店の評判 ${Math.round(st2.rep)}／前日損益 ${fmt(st2.lastPl||0)}／スタッフ${st2.staff.length}人<br>方針：価格${({low:"安売り",std:"標準",high:"強気"})[st2.dir.price]}・注力${({cust:"集客",quality:"品質",serve:"接客"})[st2.dir.focus]}${st2.dir.ad>0?"・広告中":""}`,
+   [
+    {label:"🚪 店内に入って見る",cls:"go",sub:"店長・スタッフが働く様子／手伝える",fn:enterStore2},
+    {label:"🗣 店長に指示を出す",sub:"価格方針・注力・広告・激励",dis:!st2.mgr,fn:store2Directives},
+    {label:"店長を任命/変更",sub:st2.mgr?"現："+st2.mgr.name:"不在",fn:pickMgr},
+    {label:"🚄 本店へ戻る",fn:()=>{closeDlg();travelTo(1);}},
+    {label:"閉じる",fn:closeDlg},
+   ]);
 }
-function chooseCity(k){S.city=k;applyTheme();conceptModal(false);}
-function conceptModal(change){
-  if(change&&dlgOn)closeDlg();
-  modal(`<h2>${change?"🛠 業態転換（¥150,000）":"🏮 店のコンセプトを決めよう"}</h2>`+
-   Object.keys(CONCEPTS).map(k=>{const c=CONCEPTS[k];
-    return `<button class="opt" onclick="chooseConcept('${k}',${change?1:0})">${c.e} ${c.n}<small>${c.desc}</small></button>`;}).join("")+
-   (change?'<button class="btn ghost" onclick="closeModal()">やめる</button>':""));
+function enterStore2(){closeDlg();S.inside=true;player.position.set(200,0,206);toast("🚪 2号店の店内へ。カウンター前で店長と話せる");}
+function store2Kitchen(){
+  const st2=S.st2;
+  openDlg("👨‍🍳","2号店の厨房",
+   "店長"+(st2.mgr?st2.mgr.name:"（不在）")+"が采配中。今日の売上を後押しできる。",
+   [
+    {label:"🤝 厨房を手伝う（体力15）",cls:"go",sub:dayFlags["help2"]===S.day?"今日はもう手伝った":"当日の2号店損益にボーナス",fn:()=>{
+      if(dayFlags["help2"]===S.day){toast("今日はもう手伝った");return;}
+      if(!useStam(15))return;dayFlags["help2"]=S.day;st2.boost=Math.min(0.3,(st2.boost||0)+0.12);gainXp("cook",1);
+      toast("🤝 手伝った！今日の2号店の売上が伸びる");closeDlg();
+    }},
+    {label:"🗣 店長に指示を出す",dis:!st2.mgr,fn:store2Directives},
+    {label:st2.mgr?"💪 店長を励ます（士気+8）":"店長不在",dis:!st2.mgr,fn:()=>{
+      st2.mgr.morale=Math.min(100,st2.mgr.morale+8);toast("💪 "+st2.mgr.name+"「ありがとうございます！」");closeDlg();
+    }},
+    {label:"戻る",fn:closeDlg},
+   ]);
 }
-function chooseConcept(k,change){
-  if(change){
-    if(S.money<150000){toast("¥150,000必要");return;}
-    if(S.concept===k){toast("いまと同じコンセプトだ");return;}
-    S.money-=150000;
-  }
-  S.concept=k;
-  S.menu=BASE_MENUS[k].slice(0,Math.max(2,Math.min(6,Math.ceil(S.quality*0.6)))).map(d=>({n:d.n,rec:d.rec.slice()}));
-  repaintShop();closeModal();
-  banner(conC().e+" "+cityC().n+"に「"+conC().n+"」"+(change?"へ業態転換！":"を開業！"));
-  log(change?"店を「"+conC().n+"」に改装した":cityC().n+"で「"+conC().n+"」を開業した");
-  save();renderHud();
+function store2Directives(){
+  const d=S.st2.dir;
+  openDlg("🗣","2号店 店長への指示",
+   "現在：価格"+({low:"安売り",std:"標準",high:"強気"})[d.price]+"／注力"+({cust:"集客",quality:"品質",serve:"接客"})[d.focus],
+   [
+    {label:"価格方針を変える",fn:()=>openDlg("🗣","価格方針","どうする？",[
+      {label:"安売り（客数重視）",fn:()=>{d.price="low";toast("方針：安売り");save();store2Directives();}},
+      {label:"標準",fn:()=>{d.price="std";toast("方針：標準");save();store2Directives();}},
+      {label:"強気（高単価）",fn:()=>{d.price="high";toast("方針：強気");save();store2Directives();}},
+      {label:"戻る",fn:store2Directives},
+    ])},
+    {label:"注力ポイントを変える",fn:()=>openDlg("🗣","注力","どこに力を入れる？",[
+      {label:"集客に力を入れる",fn:()=>{d.focus="cust";toast("注力：集客");save();store2Directives();}},
+      {label:"品質を磨く",fn:()=>{d.focus="quality";toast("注力：品質（評判UP）");save();store2Directives();}},
+      {label:"接客を丁寧に",fn:()=>{d.focus="serve";toast("注力：接客");save();store2Directives();}},
+      {label:"戻る",fn:store2Directives},
+    ])},
+    {label:"広告を打たせる（3日・¥30,000）",sub:d.ad>0?"実施中 残"+d.ad+"日":"2号店の集客を底上げ",fn:()=>{
+      if(S.money<30000){toast("💸 お金が足りない");return;}S.money-=30000;d.ad=3;toast("📣 2号店で広告開始");renderHud();save();closeDlg();
+    }},
+    {label:"閉じる",fn:closeDlg},
+   ]);
 }
-function repaintShop(){B.shop.children[0].material.color.setHex(conC().color);}
+function updateStore2Interior(ts){
+  const roster=[S.st2.mgr].concat(S.st2.staff).filter(Boolean);
+  const assign={prep:[],main:[],serve:[]},order=["serve","main","prep"];
+  roster.forEach((st,i)=>assign[order[i%3]].push(st));
+  for(const p of POSN)for(let i=0;i<3;i++){const m=kMesh[p][i];
+    if(i<assign[p].length){m.visible=true;const sp=STA[p].spots[i];m.position.set(sp[0],0,sp[1]);m.rotation.y=Math.PI;
+      m.position.y=Math.abs(Math.sin(ts*0.013+i+POSN.indexOf(p)))*0.14;
+      const nm=assign[p][i].name;if(m._nm!==nm)setMeshLabel(m,nm);
+    }else{m.visible=false;if(m._nm)setMeshLabel(m,"");}}
+  const amb=roster.length&&S.st2.mgr?clamp(2+Math.floor(S.st2.rep/18),0,Math.min(S.seats,MAXSEATS)):0;
+  for(let i=0;i<MAXSEATS;i++){const sm=seatMesh[i];
+    if(i<amb){sm.visible=true;sm.children[0].material.color.setHex(SEG3[["student","salary","oyaji","family","couple","tourist"][i%6]].c);sm.position.set(SEATPOS[i][0],Math.abs(Math.sin(ts*0.006+i))*0.05,SEATPOS[i][1]);}
+    else sm.visible=false;}
+}
+function interior2Interacts(){
+  return [
+    {x:200,z:208.2,r:2.4,label:"🚪 店の外に出る",fn:exitShop},
+    {x:200,z:201.6,r:2.8,label:"👨‍🍳 店長のところへ（手伝う/指示）",fn:store2Kitchen},
+  ];
+}
 // ---------------- ミニマップ ----------------
 function drawMap(){
   const c=$("mmap").getContext("2d");
@@ -1522,22 +2029,20 @@ function drawMap(){
   c.fillStyle="#d95d39";
   c.beginPath();c.arc(P(player.position.x),P(player.position.z),4.5,0,7);c.fill();
   c.strokeStyle="#fff";c.lineWidth=1.5;c.stroke();
-  c.fillStyle="#7a1f0a";c.font="bold 10px sans-serif";c.fillText("店",P(0)-5,P(20)+4);
+  c.fillStyle="#7a1f0a";c.font="bold 10px sans-serif";c.fillText(S.activeStore===2?"2号":"店",P(0)-5,P(20)+4);
   if(S.inside){
     c.fillStyle="rgba(20,18,15,.55)";c.fillRect(0,0,140,140);
-    c.fillStyle="#fff";c.font="bold 12px sans-serif";c.fillText("🏮 店内にいます",28,74);
+    c.fillStyle="#fff";c.font="bold 12px sans-serif";c.fillText(S.activeStore===2?"🏢 2号店の店内":"🏮 店内にいます",20,74);
   }
 }
 // ---------------- 空・昼夜 ----------------
 function skyUpdate(){
-  const h=hourNow();
-  let c,f,i;
+  const h=hourNow();let c,i;
   if(h>=5&&h<8){c=0xffdfb8;i=0.7;}
   else if(h>=8&&h<16){c=0xbfe0ff;i=1.0;}
   else if(h>=16&&h<19){c=0xffc490;i=0.7;}
   else{c=0x1c2340;i=0.25;}
-  scene.background=new THREE.Color(c);
-  scene.fog.color.set(c);
+  scene.background=new THREE.Color(c);scene.fog.color.set(c);
   sun.intensity=i*0.8;amb.intensity=Math.max(0.35,i*0.9);
 }
 // ---------------- MAIN LOOP ----------------
@@ -1545,16 +2050,14 @@ let last=performance.now(),hudT=0,saveT=0;
 function loop(ts){
   const dt=Math.min(0.05,(ts-last)/1000);last=ts;
   if(!S.gameOver){
-    // 時間 1実秒=2ゲーム分
     S.tmin+=dt*2;
     if(S.tmin>=1440){S.tmin-=1440;settle();}
-    // 深夜2時に強制ダウン
     if(hourNow()>=2&&hourNow()<3&&S.sleptDay<S.day&&S.tmin>=120&&S.tmin<180){
-      S.money-=10000;player.position.set(-38,0,17.5);
+      S.money-=10000;if(S.activeStore!==1){S.activeStore=1;applyTheme();repaintShop();}
+      player.position.set(-38,0,17.5);S.inside=false;
       banner("😵 過労で倒れた…病院代¥10,000（家に運ばれた）");
       S.tmin=360;S.stam=Math.round(S.maxStam*0.5);S.sleptDay=S.day;
     }
-    // ステータス自然減
     S.hunger=clamp(S.hunger-dt*0.10,0,100);
     if(S.hunger<=5)S.stam=clamp(S.stam-dt*0.5,0,S.maxStam);
     // 移動
@@ -1565,7 +2068,7 @@ function loop(ts){
       if(len>0.1){
         mx/=Math.max(1,len);mz/=Math.max(1,len);
         const sp=(S.stam<15?4:8)*dt;
-        const bx=S.inside?[193,207]:[-52,52],bz=S.inside?[197.5,207.5]:[-56,36];
+        const bx=S.inside?[192.5,207.5]:[-52,52],bz=S.inside?[197.6,208.3]:[-56,36];
         const nx=clamp(player.position.x+mx*sp,bx[0],bx[1]);
         const nz=clamp(player.position.z+mz*sp,bz[0],bz[1]);
         if(!collide(nx,player.position.z))player.position.x=nx;
@@ -1574,7 +2077,6 @@ function loop(ts){
         player.position.y=Math.abs(Math.sin(ts*0.012))*0.12;
       }else player.position.y=0;
     }
-    // カメラ
     camera.position.lerp(new THREE.Vector3(player.position.x,15,player.position.z+13),0.08);
     camera.lookAt(player.position.x,1.5,player.position.z);
     // 通行人
@@ -1583,35 +2085,12 @@ function loop(ts){
       if(d<1){p.tx=R(-45,45);p.tz=R(-45,32);}
       else{p.m.position.x+=dx/d*p.sp*dt;p.m.position.z+=dz/d*p.sp*dt;p.m.rotation.y=Math.atan2(dx,dz);p.m.position.y=Math.abs(Math.sin(ts*0.01+p.sp*7))*0.1;}
     });
-    // 客
-    for(let i=custs.length-1;i>=0;i--){
-      const c=custs[i];
-      if(c.phase==="walk"){
-        const w=c.wp[0];
-        const dx=w[0]-c.m.position.x,dz=w[1]-c.m.position.z,d=Math.hypot(dx,dz);
-        if(d<0.8){c.wp.shift();if(!c.wp.length)serveCust(c);}
-        else{c.m.position.x+=dx/d*3.2*dt;c.m.position.z+=dz/d*3.2*dt;c.m.rotation.y=Math.atan2(dx,dz);c.m.position.y=Math.abs(Math.sin(ts*0.013+i))*0.12;}
-      }else if(c.phase==="eat"){
-        c.t-=dt;
-        if(c.t<=0){c.m.visible=true;c.phase="leave";c.tx=pick([-52,52]);c.m.position.set(R(-2,2),0,13);}
-      }else if(c.phase==="leave"||c.phase==="angry"){
-        if(c.phase==="angry"&&c.t===0){c.t=1;c.tx=pick([-52,52]);}
-        const dx=c.tx-c.m.position.x;
-        c.m.position.x+=Math.sign(dx)*3.5*dt;
-        c.m.position.z+=(0-c.m.position.z)*dt*0.5;
-        c.m.rotation.y=Math.atan2(Math.sign(dx),0);
-        if(Math.abs(dx)<2){scene.remove(c.m);custs.splice(i,1);}
-      }
-    }
+    // 接客・厨房パイプライン
+    serviceTick(dt,ts);
+    if(S.inside&&S.activeStore===2)updateStore2Interior(ts);
+    updateCarry(ts);
     // FX
-    for(let i=fx.length-1;i>=0;i--){
-      const f=fx[i];f.age+=dt;f.s.position.y+=dt*1.5;
-      f.s.material.opacity=1-f.age;
-      if(f.age>1){scene.remove(f.s);fx.splice(i,1);}
-    }
-    // 店内の座席（食事中の客が座って見える）
-    const eating=custs.filter(c=>c.phase==="eat").length;
-    sitters.forEach((s,i)=>{s.visible=i<eating;});
+    for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.age+=dt;f.s.position.y+=dt*1.5;f.s.material.opacity=1-f.age;if(f.age>1){scene.remove(f.s);fx.splice(i,1);}}
     salesTick(dt);
     checkInteract();
     skyUpdate();
@@ -1623,35 +2102,38 @@ function loop(ts){
 }
 // ---------------- INIT ----------------
 load();
-if(S.gameOver){$("over").classList.add("on");
-  $("overTxt").innerHTML="前回は倒産してしまった…。<br>再挑戦しよう。";
-}
+// 旧セーブの移行
+if(S.city==="sapporo")S.city="hokkaido";
+if(!PREF[S.city])S.city=S.city&&PREFKEYS.includes(S.city)?S.city:(S.city?"tokyo":null);
+POSN.forEach(p=>{const v=S.formation[p];if(typeof v==="string")S.formation[p]=v?[v]:[];else if(!Array.isArray(v))S.formation[p]=[];});
+if(S.st2&&S.st2.owned&&!S.st2.pref){S.st2.pref=S.city||"tokyo";S.st2.concept=S.st2.concept||S.concept||"shokudo";}
+if(typeof S.seats!=="number")S.seats=4;
+S.activeStore=1;S.inside=false;
+if(S.gameOver){$("over").classList.add("on");$("overTxt").innerHTML="前回は倒産してしまった…。<br>再挑戦しよう。";}
 if(S.minaKanban||S.staff.some(s=>s.mina)||(S.st2.mgr&&S.st2.mgr.mina))NPC.mina.m.position.set(4.5,0,14);
-if(S.st2.owned){const lb=makeLabel("2号店",1,"rgba(217,93,57,.9)");lb.position.set(-18,8,20);scene.add(lb);}
 renderHud();
-function startFlow(){if(!S.city)citySelect();else if(!S.concept)conceptModal(false);else closeModal();}
-// 旧バージョンのセーブを移行（材料の種類がない在庫は破棄・メニュー生成）
+function startFlow(){if(!S.city)openNationalMap("start");else if(!S.concept)conceptModal(false);else closeModal();}
 S.stock=S.stock.filter(s=>s.t);
 ensureMenu();
 if(S.concept)repaintShop();
 if(S.city)applyTheme();
 if(S.hq)buildHQ();
-if(S.inside)player.position.set(200,0,204);
-if(!S.gameOver&&(S.day>1||S.custs>0)&&!S.city){citySelect();}
-else if(S.day===1&&S.custs===0&&S.sales===0&&!S.gameOver){
-  modal(`<h2>🏮 名店ものがたり3D 〜全国出店編〜</h2>
+if(!S.gameOver&&(S.day>1||S.custs>0)&&!S.city){openNationalMap("start");}
+else if(S.day===1&&S.custs===0&&S.sales===0&&!S.gameOver&&!S.city){
+  modal(`<h2>🏮 名店ものがたり3D 〜全国47都道府県編〜</h2>
   <p style="font-size:13px;line-height:1.9;color:#555">
   あなたは料理人。資金<b>30万円</b>を握りしめ、日本のどこかで店を開く。<br><br>
   🚶 <b>移動</b>：WASD／矢印キー、スマホは画面左をドラッグ<br>
-  🗣 <b>行動</b>：人や建物に近づいてボタン（<kbd>E</kbd>キー）<br>
-  📱 <b>スマホ</b>：電話注文・チャット（割高だけど便利）<br>
-  🗺 <b>右下マップ</b>で町を把握<br><br>
-  📦 仕入れは3軒（激安★1／標準★2／名店★3）から。鮮度2日で廃棄！<br>
-  雇用・広告・融資・業態転換・2号店・フランチャイズ…全部あなた次第。<br><br>
-  <b style="color:var(--danger)">⚠️ 所持金マイナスが2日続くと倒産（ゲームオーバー）</b></p>
+  🗣 <b>行動</b>：人や建物に近づいてボタン（<kbd>E</kbd>）／厨房で手伝う（<kbd>Q</kbd>）<br>
+  🍳 <b>厨房</b>：各持ち場（仕込み→調理→接客）で従業員が働く。近づいて手伝い・指示！<br>
+  🪑 <b>席と行列</b>：満席だと行列に。増席で回転UP<br>
+  🗾 <b>全国マップ</b>：47都道府県で開業・移動・2号店出店<br>
+  🔥 <b>バズ</b>：SNS×品質×神対応で客が殺到する日も<br><br>
+  <b style="color:var(--danger)">⚠️ 所持金マイナスが2日続くと倒産</b></p>
   <button class="btn acc" onclick="startFlow()">人生スタート</button>`);
-}
+}else if(!S.gameOver){closeModal();}
 requestAnimationFrame(loop);
+
 </script>
 </body>
 </html>
